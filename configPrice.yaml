@@ -1,0 +1,11 @@
+price:
+    baby: 0
+    children: 8
+    normal: 16
+    senior: 12
+    reduced: 10
+
+age: #item -> jusqu'à (ex: baby: 4 -> de 0 jusqu'à 4ans)
+    baby: 4
+    children: 12
+    normal: 60
