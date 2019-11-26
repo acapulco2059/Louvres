@@ -39,11 +39,11 @@ class User
     private $ticket;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\country")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="integer")
+     * @ORM\JoinColumn(name="country_id", referencedColumnName="id")
      */
-    private $country;
-
+    private $countryId;
+    
 
     public function __construct()
     {
@@ -62,7 +62,7 @@ class User
 
     public function setFirstname(string $firstname): self
     {
-        $this->firstname = $firstname;
+        $this->firstname = ucfirst($firstname);
 
         return $this;
     }
@@ -74,7 +74,7 @@ class User
 
     public function setLastname(string $lastname): self
     {
-        $this->lastname = $lastname;
+        $this->lastname = strtoupper($lastname);
 
         return $this;
     }
@@ -108,14 +108,14 @@ class User
         return $this;
     }
 
-    public function getCountry(): ?country
+    public function getCountryId(): ?int
     {
-        return $this->country;
+        return $this->countryId;
     }
 
-    public function setCountry(?country $country): self
+    public function setCountryId(int $countryId): self
     {
-        $this->country = $country;
+        $this->countryId = $countryId;
 
         return $this;
     }

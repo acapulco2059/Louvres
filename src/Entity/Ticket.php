@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Doctrine\UuidType;
+use Ramsey\Uuid;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\TicketRepository")
@@ -14,8 +14,6 @@ class Ticket
      * @var \Ramsey\Uuid\UuidInterface
      *
      * @ORM\Column(type="uuid", unique=true)
-     * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
      */
     private $uniqueId;
 
@@ -41,6 +39,11 @@ class Ticket
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;
+
+    public function __construct()
+    {
+        $this->uniqueId = Uuid\Uuid::uuid4();
+    }
 
     public function getId(): ?int
     {

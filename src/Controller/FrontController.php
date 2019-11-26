@@ -101,13 +101,9 @@ class FrontController extends AbstractFOSRestController
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $user = new User();
-            $ticket = new Ticket();
             $country = new Country();
-            $ticketPrice = new TicketPrice();
             $ticketManager = new TicketManager();
             $visitor = $request->get('visitor');
-            
 
             //Init ordered with unique_id
             $ordered = $this->getDoctrine()
@@ -117,25 +113,28 @@ class FrontController extends AbstractFOSRestController
             $visitorNumber = count($request->get('visitor'));
 
             if (isset($ordered)) {
-                for ($i = 1; $i < $visitorNumber; $i++) {
+                for ($i = 0; $i < $visitorNumber; $i++) {
+                    $user = new User();
+                    $ticket = new Ticket();
+                    $ticketPrice = new TicketPrice();
+
                     $birthday = new \DateTime($visitor[$i]['birthday']);
                     $userPrice = $ticketPrice->userPrice($visitor[$i]['birthday'], $visitor[$i]['reduice']);
 
                     $user->setFirstname($visitor[$i]['firstname'])
                         ->setLastname($visitor[$i]['lastname'])
                         ->setBirthDate($birthday)
-                        ->setCountry($visitor[$i]['country']);
+                        ->setCountryId($visitor[$i]['country']);
 
                     $ticket->setUser($user)
                         ->setPrice($userPrice);
 
-                    $ordered->addTicket($ticket)
-                        ->setState(2);
-
-                    //setting in BDD with doctrine
-                    $em->persist($ordered);
-                    $em->flush();
+                    $ordered->addTicket($ticket);
                 }
+                $ordered->setState(2);
+                //setting in BDD with doctrine
+                $em->persist($ordered);
+                $em->flush();
 
                 $orderedId = $ordered->getId();
 
