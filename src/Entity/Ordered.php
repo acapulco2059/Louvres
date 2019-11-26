@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Ramsey\Uuid\Doctrine\UuidType;
+use Ramsey\Uuid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,8 +16,6 @@ class Ordered
      * @var \Ramsey\Uuid\UuidInterface
      *
      * @ORM\Column(type="uuid", unique=true)
-     * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
      */
     private $uniqueId;
 
@@ -54,13 +52,19 @@ class Ordered
     private $state;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Ticket", mappedBy="ordered")
+     * @ORM\OneToMany(targetEntity="App\Entity\Ticket", mappedBy="ordered", cascade="persist")
      */
     private $tickets;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $halfDay;
 
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->uniqueId = Uuid::uuid4();
     }
 
     public function getId(): ?int
@@ -167,6 +171,18 @@ class Ordered
                 $ticket->setOrdered(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHalfDay(): ?bool
+    {
+        return $this->halfDay;
+    }
+
+    public function setHalfDay(bool $halfDay): self
+    {
+        $this->halfDay = $halfDay;
 
         return $this;
     }

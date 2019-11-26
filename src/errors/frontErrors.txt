@@ -1,0 +1,37 @@
+23-11-2019 : Notice: Undefined property: App\Controller\FrontController::$user
+23-11-2019 : Notice: Undefined property: App\Controller\FrontController::$user
+23-11-2019 (04:31) : Notice: Undefined property: App\Controller\FrontController::$user
+25-11-2019 (16:42) : Notice: Undefined variable: visitor
+25-11-2019 (17:03) : Notice: Use of undefined constant visitor - assumed 'visitor'
+25-11-2019 (17:05) : Notice: Undefined index: firstname
+25-11-2019 (17:11) : Notice: Undefined offset: 3
+25-11-2019 (17:29) : An exception occured while establishing a connection to figure out your platform version.
+You can circumvent this by setting a 'server_version' configuration value
+
+For further information have a look at:
+https://github.com/doctrine/DoctrineBundle/issues/673
+25-11-2019 (17:29) : An exception occured while establishing a connection to figure out your platform version.
+You can circumvent this by setting a 'server_version' configuration value
+
+For further information have a look at:
+https://github.com/doctrine/DoctrineBundle/issues/673
+26-11-2019 (02:02) : [Semantical Error] line 0, col 52 near 'user_id =3': Error: Class App\Entity\Ticket has no field or association named user_id
+26-11-2019 (02:03) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:03) : [Semantical Error] line 0, col 52 near 'orderedId = ': Error: Class App\Entity\Ticket has no field or association named orderedId
+26-11-2019 (02:05) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:06) : [Syntax Error] line 0, col 66: Error: Expected Literal, got '$'
+26-11-2019 (02:07) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:08) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:15) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:15) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:15) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:15) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:24) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:26) : [Semantical Error] line 0, col 52 near 'ordered_id =': Error: Class App\Entity\Ticket has no field or association named ordered_id
+26-11-2019 (02:35) : Unrecognized field: unique_id
+26-11-2019 (02:35) : Unrecognized field: ordered_id
+26-11-2019 (02:36) : Unrecognized field: orderedId
+26-11-2019 (03:01) : Unrecognized field: ordered
+26-11-2019 (03:40) : Notice: Undefined property: App\Entity\Ordered::$getTickets
+26-11-2019 (14:17) : Warning: count() expects at least 1 parameter, 0 given
+26-11-2019 (14:38) : Warning: Illegal offset type

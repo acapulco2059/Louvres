@@ -11,7 +11,7 @@ class DateManager
     private $holiday = [];
 
     public function __construct(){
-        $dates = Yaml::parseFile(__DIR__.'/configDate.yaml');
+        $dates = Yaml::parseFile('../configDate.yaml');
         $this->openDay = $dates["open"];
         foreach ($dates["holiday"] as $key => $value) {
             $valueTmp = explode("/",$value);
@@ -26,23 +26,16 @@ class DateManager
      * @param  DateTime $date [description]
      * @return boolean        [description]
      */
-    public function isOpened(DateTime $date){
-        $day = date("l", $date);
+    public function isOpened(\DateTime $date)
+    {
+        $day = date_format($date, 'l');
         $opened = $this->openDay[$day];
-        if ($opened) $opened = !$this->isHoliday($date);
-        return $opened;
-    }
-
-    /**
-     * [isHoliday description]
-     * @param  DateTime $date [description]
-     * @return boolean        [description]
-     */
-    private function isHoliday(DateTime $date){
         $reservationDate = $date->format('Y/m/d');
-		if (array_search($reservationDate, $this->holiday)) return true;
-		return false;
-	}
+        if ($opened) {
+            if (!in_array($reservationDate, $this->holiday)) return true;
+        }
+        return false;
+    }
 }
 
 // DateManager->isOpened(dateDuFomulaire)

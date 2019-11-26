@@ -34,14 +34,15 @@ class User
     private $birthDate;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\country")
+     * @ORM\OneToOne(targetEntity="App\Entity\Ticket", mappedBy="user", cascade={"persist", "remove"})
      */
-    private $country;
+    private $ticket;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Ticket", mappedBy="user")
+     * @ORM\ManyToOne(targetEntity="App\Entity\country")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $tickets;
+    private $country;
 
 
     public function __construct()
@@ -90,6 +91,23 @@ class User
         return $this;
     }
 
+    public function getTicket(): ?Ticket
+    {
+        return $this->ticket;
+    }
+
+    public function setTicket(Ticket $ticket): self
+    {
+        $this->ticket = $ticket;
+
+        // set the owning side of the relation if necessary
+        if ($ticket->getUser() !== $this) {
+            $ticket->setUser($this);
+        }
+
+        return $this;
+    }
+
     public function getCountry(): ?country
     {
         return $this->country;
@@ -98,37 +116,6 @@ class User
     public function setCountry(?country $country): self
     {
         $this->country = $country;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Ticket[]
-     */
-    public function getTickets(): Collection
-    {
-        return $this->tickets;
-    }
-
-    public function addTicket(Ticket $ticket): self
-    {
-        if (!$this->tickets->contains($ticket)) {
-            $this->tickets[] = $ticket;
-            $ticket->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTicket(Ticket $ticket): self
-    {
-        if ($this->tickets->contains($ticket)) {
-            $this->tickets->removeElement($ticket);
-            // set the owning side to null (unless already changed)
-            if ($ticket->getUser() === $this) {
-                $ticket->setUser(null);
-            }
-        }
 
         return $this;
     }

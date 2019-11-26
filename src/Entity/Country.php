@@ -17,23 +17,91 @@ class Country
     private $id;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $code;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
-    private $country;
+    private $alpha2;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $alpha3;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $nameEnGB;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $nameFrFr;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCountry(): ?string
+    public function getCode(): ?int
     {
-        return $this->country;
+        return $this->code;
     }
 
-    public function setCountry(string $country): self
+    public function setCode(int $code): self
     {
-        $this->country = $country;
+        $this->code = $code;
+
+        return $this;
+    }
+
+    public function getAlpha2(): ?string
+    {
+        return $this->alpha2;
+    }
+
+    public function setAlpha2(string $alpha2): self
+    {
+        $this->alpha2 = $alpha2;
+
+        return $this;
+    }
+
+    public function getAlpha3(): ?string
+    {
+        return $this->alpha3;
+    }
+
+    public function setAlpha3(string $alpha3): self
+    {
+        $this->alpha3 = $alpha3;
+
+        return $this;
+    }
+
+    public function getNameEnGB(): ?string
+    {
+        return $this->nameEnGB;
+    }
+
+    public function setNameEnGB(string $nameEnGB): self
+    {
+        $this->nameEnGB = $nameEnGB;
+
+        return $this;
+    }
+
+    public function getNameFrFr(): ?string
+    {
+        return $this->nameFrFr;
+    }
+
+    public function setNameFrFr(string $nameFrFr): self
+    {
+        $this->nameFrFr = $nameFrFr;
 
         return $this;
     }

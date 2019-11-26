@@ -1,11 +1,11 @@
 open:
-  monday: true
-  tuesday: false
-  wednesday: true
-  thuesday: true
-  friday: true
-  saturday: true
-  sunday: false
+  Monday: true
+  Tuesday: false
+  Wednesday: true
+  Thursday: true
+  Friday: true
+  Saturday: true
+  Sunday: false
 
 holiday:
   - 12/25

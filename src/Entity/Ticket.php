@@ -32,12 +32,13 @@ class Ticket
     private $price;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\ordered", inversedBy="tickets")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Ordered", inversedBy="tickets")
      */
     private $ordered;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\user", inversedBy="tickets")
+     * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="ticket", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
      */
     private $user;
 
@@ -87,10 +88,11 @@ class Ticket
         return $this->user;
     }
 
-    public function setUser(?user $user): self
+    public function setUser(user $user): self
     {
         $this->user = $user;
 
         return $this;
     }
+
 }

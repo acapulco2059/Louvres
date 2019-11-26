@@ -13,7 +13,7 @@ class TicketPrice
 
     public function __construct()
     {
-        $value = Yaml::parseFile(__DIR__.'/configPrice.yaml');
+        $value = Yaml::parseFile('../configPrice.yaml');
         $this->price["baby"] = $value["price"]["baby"];
         $this->price["children"] = $value["price"]["children"];
         $this->price["normal"] = $value["price"]["normal"];
@@ -37,7 +37,6 @@ class TicketPrice
 
     public function userPrice($birth_date, $reduice)
     {
-
         $age = $this->userAge($birth_date);
 
         switch (true) {

@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20191118184402 extends AbstractMigration
+final class Version20191126183428 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,10 +22,8 @@ final class Version20191118184402 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE ordered CHANGE unique_id unique_id CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\'');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_C3121F99E3C68343 ON ordered (unique_id)');
-        $this->addSql('ALTER TABLE ticket CHANGE unique_id unique_id CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\'');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_97A0ADA3E3C68343 ON ticket (unique_id)');
+        $this->addSql('ALTER TABLE user DROP INDEX UNIQ_8D93D649F92F3E70, ADD INDEX IDX_8D93D649F92F3E70 (country_id)');
+        $this->addSql('ALTER TABLE user CHANGE country_id country_id INT NOT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -33,9 +31,7 @@ final class Version20191118184402 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('DROP INDEX UNIQ_C3121F99E3C68343 ON ordered');
-        $this->addSql('ALTER TABLE ordered CHANGE unique_id unique_id VARCHAR(255) NOT NULL COLLATE utf8mb4_unicode_ci');
-        $this->addSql('DROP INDEX UNIQ_97A0ADA3E3C68343 ON ticket');
-        $this->addSql('ALTER TABLE ticket CHANGE unique_id unique_id VARCHAR(255) NOT NULL COLLATE utf8mb4_unicode_ci');
+        $this->addSql('ALTER TABLE user DROP INDEX IDX_8D93D649F92F3E70, ADD UNIQUE INDEX UNIQ_8D93D649F92F3E70 (country_id)');
+        $this->addSql('ALTER TABLE user CHANGE country_id country_id INT DEFAULT NULL');
     }
 }
