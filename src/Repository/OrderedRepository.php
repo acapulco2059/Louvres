@@ -19,6 +19,16 @@ class OrderedRepository extends ServiceEntityRepository
         parent::__construct($registry, Ordered::class);
     }
 
+    public function countNumberOfTicket(\DateTime $date)
+    {
+        return $this->createQueryBuilder('u')
+            ->select('SUM(u.numberOfTicket) as totalTicket')
+            ->where('u.visitDay = :visitDay')
+            ->setParameter('visitDay', $date)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     // /**
     //  * @return Ordered[] Returns an array of Ordered objects
     //  */

@@ -6,10 +6,10 @@ use App\Entity\Country;
 use App\Entity\Ordered;
 use App\Entity\Ticket;
 use App\Entity\User;
-use App\Repository\OrderRepository;
 use App\Services\DateManager;
 use App\Services\TicketPrice;
 use App\Services\TicketManager;
+use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\Annotations\Get;
@@ -52,13 +52,25 @@ class FrontController extends AbstractFOSRestController
     public function initOrder(Request $request)
     {
         try {
+            //instantiation of entities
             $ordered = new Ordered();
             $dateManager = new DateManager();
+            $ticketManager = new TicketManager();
 
-            $verifDate = $dateManager->isOpened(new \DateTime($request->get('visit_day')));
+            $dateManager->isOpened(new \DateTime($request->get('visit_day')));
 
-            if ($verifDate) {
-                if ($verifDate) {
+            //Count of ticket by date
+            $getCountTicket = $this->getDoctrine()
+                ->getRepository(Ordered::class)
+                ->countNumberOfTicket(new \DateTime($request->get('visit_day')));
+            $getCountTicket = intval($getCountTicket['totalTicket']);
+
+            //check if the date selected and available
+            if ($dateManager->isOpened(new \DateTime($request->get('visit_day'))))
+            {
+                //check if the number of remaining tickets is sufficient
+                if ($ticketManager->availabilityCheck($getCountTicket))
+                {
                     $ordered->setEmail($request->get('email'))
                         ->setNumberOfTicket($request->get('number_of_ticket'))
                         ->setVisitDay(new \DateTime($request->get('visit_day')))
@@ -69,19 +81,23 @@ class FrontController extends AbstractFOSRestController
 
                     $em = $this->getDoctrine()->getManager();
 
+                    //set Order in BDD with doctrine
                     $em->persist($ordered);
                     $em->flush();
-                }
-            }
 
+                    //prepares the information to be transmitted
+                    $data = [
+                        "number_of_ticket" => $ordered->getNumberOfTicket(),
+                        "ordered_unique_id" => $ordered->getUniqueId()
+                    ];
 
-            $data = [
-                "number_of_ticket" => $ordered->getNumberOfTicket(),
-                "ordered_unique_id" => $ordered->getUniqueId()
-            ];
+                    $view = $this->view($data, 201);
+                    return $this->handleView($view);
 
-            $view = $this->view($data, 201);
-            return $this->handleView($view);
+                } return "Pas assez de place";
+
+            } return "Date non disponible";
+
 
         } catch (Exception $e) {
             fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date(d - m - Y) . " : " . $e->getMessage());

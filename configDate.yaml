@@ -1,3 +1,5 @@
+capacity: 1000
+
 open:
   Monday: true
   Tuesday: false

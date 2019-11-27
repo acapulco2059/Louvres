@@ -44,7 +44,7 @@ class TicketPrice
                 $price = $this->price["baby"];
                 break;
 
-            case $age >= $this->age["baby"] AND $this->age["children"]:
+            case $age >= $this->age["baby"] AND $age < $this->age["children"]:
                 $price = $this->price["children"];
                 break;
 
