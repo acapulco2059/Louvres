@@ -65,6 +65,12 @@ class Ordered
      */
     private $halfDay;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $stripeId;
+
+
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
@@ -187,6 +193,18 @@ class Ordered
     public function setHalfDay(bool $halfDay): self
     {
         $this->halfDay = $halfDay;
+
+        return $this;
+    }
+
+    public function getStripeId(): ?string
+    {
+        return $this->stripeId;
+    }
+
+    public function setStripeId(?string $stripeId): self
+    {
+        $this->stripeId = $stripeId;
 
         return $this;
     }

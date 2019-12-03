@@ -99,8 +99,8 @@ class FrontController extends AbstractFOSRestController
             } return "Date non disponible";
 
 
-        } catch (Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date(d - m - Y) . " : " . $e->getMessage());
+        } catch (\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date(d - m - Y) . " : initOrder - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -117,8 +117,6 @@ class FrontController extends AbstractFOSRestController
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $country = new Country();
-            $ticketManager = new TicketManager();
             $visitor = $request->get('visitor');
 
             //Init ordered with unique_id
@@ -152,19 +150,161 @@ class FrontController extends AbstractFOSRestController
                 $em->persist($ordered);
                 $em->flush();
 
-                $orderedId = $ordered->getId();
+                //get values ​​for the next algorithm
+                $getTicket = $ordered->getTickets()->getValues();
+                $numberOfTicket = $ordered->getTickets()->count();
 
+                // Creating array for calculated the totalPrice
+                $prices = array();
+                for($k = 0; $k < $numberOfTicket; $k++)
+                {
+                    $price = $getTicket[$k]->getPrice();
+                    array_push($prices, $price);
+                }
+                $totalPrice = array_sum($prices);
+
+                // update Ordered
+                $ordered->setTotalPrice($totalPrice)
+                    ->setNumberOfTicket($numberOfTicket)
+                    ->setState(2);
+
+                // Set ordered in BDD
+                $em->persist($ordered);
+                $em->flush();
+
+                // Creating the Users array for the View
+                $users = array();
+                for($j = 0; $j < $numberOfTicket; $j++)
+                {
+                    $insertUser = array('firstname' => $getTicket[$j]->getUser()->getFirstname(),
+                        'lastname' => $getTicket[$j]->getUser()->getLastname(),
+                        'unique_id' => $getTicket[$j]->getUniqueId(),
+                        'price' => $getTicket[$j]->getPrice());
+                    array_push($users, $insertUser);
+                }
+
+                // Array for the View
                 $data = [
-                    "total_price" => $ordered->getTotalPrice()
+                    'users' => $users,
+                    'total_price' => $ordered->getTotalPrice(),
+                    'ordered_unique_id' => $ordered->getUniqueId()
                 ];
 
                 $view = $this->view($data, 201);
                 return $this->handleView($view);
             }
-        } catch (Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date(d - m - Y) . " : " . $e->getMessage());
+        } catch (\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : validOrder - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
+    }
 
+
+    /**
+     * @Post(
+     *     "/payment"
+     * )
+     * @param Request $request
+     * @Rest\View
+     */
+    public function payment(Request $request)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+
+            //Init ordered with unique_id
+            $uniqueId = $request->get('ordered_unique_id');
+
+            if(!empty($uniqueId))
+            {
+                $ordered = $this->getDoctrine()
+                    ->getRepository(Ordered::class)
+                    ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
+
+                \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
+
+                $intent = \Stripe\PaymentIntent::create([
+                    'amount' => $ordered->getTotalPrice()*100,
+                    'currency' => 'eur',
+                    'payment_method_types' => ['card'],
+                ]);
+
+
+                $ordered->setStripeId($intent->id);
+                $em->persist($ordered);
+                $em->flush();
+
+                $data = [
+                  "status" => $intent->status
+                ];
+
+
+                $view = $this->view($data, 201);
+                return $this->handleView($view);
+            }
+            
+        }
+        catch(\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : Payment - " . $e->getMessage());
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
+        }
+    }
+
+    /**
+     * @Rest\Post(
+     *     "/payment_checkout"
+     * )
+     * @param Request $request
+     * @Rest\View
+     */
+    public function paymentCheckout(Request $request)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+
+            //Init ordered with unique_id
+            $uniqueId = $request->get('ordered_unique_id');
+            $amount = $request->get('amount');
+
+            if(!empty($uniqueId))
+            {
+                $ordered = $this->getDoctrine()
+                    ->getRepository(Ordered::class)
+                    ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
+
+                if(!empty($amount) && $amount ==! 0)
+                {
+                    //init stripe
+                    \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
+
+                    //Create checkout
+                    $sessionStripe = \Stripe\Checkout\Session::create(
+                        [
+                            'client_reference_id'=> $ordered->getUniqueId(),
+                            'success_url' => 'https://example.com/success',
+                            'cancel_url' => 'https://example.com/cancel',
+                            'payment_method_types' => ['card'],
+                            'line_items' => [
+                                'name' => 'Billeterie, musée du Louvre',
+                                //'description' => $description,
+                                'images' => ['https://www.louvre.fr/sites/default/files/imagecache/278x175/medias/medias_images/images/louvre-entree-de-la-pyramide-du-louvre-140-87-px.jpg?1556898670'],
+                                'amount' => $amount,
+                                'currency' => 'eur',
+                                'quantity' => 1
+                            ],
+                        ]);
+
+                    //update the choice with the user id
+                    $ordered->setStripeid($sessionStripe->id);
+                    $em->persist($ordered);
+                    $em->flush();
+                }
+            }
+
+        }
+        catch (\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : Payment_Checkout - " . $e->getMessage());
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
+        }
     }
 }

@@ -19,15 +19,6 @@ class TicketRepository extends ServiceEntityRepository
         parent::__construct($registry, Ticket::class);
     }
 
-    public function getTicketByOrderedId($orderedId)
-    {
-        return $this->createQueryBuilder('u')
-            ->select('u')
-            ->where('u.orderedId = :orderedId')
-            ->setParameter('orderedId', $orderedId)
-            ->getQuery()
-            ->getArrayResult();
-    }
 
     // /**
     //  * @return Ticket[] Returns an array of Ticket objects

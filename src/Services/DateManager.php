@@ -15,7 +15,7 @@ class DateManager
         $this->openDay = $dates["open"];
         foreach ($dates["holiday"] as $key => $value) {
             $valueTmp = explode("/",$value);
-            if (count($valueTmp === 2)) $value = date("Y").'/'.$value;
+            if (count($valueTmp) === 2) $value = date("Y").'/'.$value;
             array_push($this->holiday, $value);
         }
     }
