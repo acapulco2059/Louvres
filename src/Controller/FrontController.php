@@ -258,13 +258,11 @@ class FrontController extends AbstractFOSRestController
                             'text/html'
                         )
                     ;
-
-                    session_destroy();
-                    $resultMail = $mailer->send($message,$failures);
+                    $mailer->send($message,$failures);
                 }
 
                 $data = [
-                  "status" => $intent->status
+                    "status" => $intent->status
                 ];
 
 
@@ -279,73 +277,14 @@ class FrontController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Post(
-     *     "/payment_checkout"
-     * )
-     * @param Request $request
-     * @Rest\View
-     */
-    public function paymentCheckout(Request $request)
-    {
-        try{
-            $em = $this->getDoctrine()->getManager();
-
-            //Init ordered with unique_id
-            $uniqueId = $request->get('ordered_unique_id');
-            $amount = $request->get('amount');
-
-            if(!empty($uniqueId))
-            {
-                $ordered = $this->getDoctrine()
-                    ->getRepository(Ordered::class)
-                    ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
-
-                if(!empty($amount) && $amount ==! 0)
-                {
-                    //init stripe
-                    \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
-
-                    //Create checkout
-                    $sessionStripe = \Stripe\Checkout\Session::create(
-                        [
-                            'client_reference_id'=> $ordered->getUniqueId(),
-                            'success_url' => 'https://example.com/success',
-                            'cancel_url' => 'https://example.com/cancel',
-                            'payment_method_types' => ['card'],
-                            'line_items' => [
-                                'name' => 'Billeterie, musée du Louvre',
-                                //'description' => $description,
-                                'images' => ['https://www.louvre.fr/sites/default/files/imagecache/278x175/medias/medias_images/images/louvre-entree-de-la-pyramide-du-louvre-140-87-px.jpg?1556898670'],
-                                'amount' => $amount,
-                                'currency' => 'eur',
-                                'quantity' => 1
-                            ],
-                        ]);
-
-                    //update the choice with the user id
-                    $ordered->setStripeid($sessionStripe->id);
-                    $em->persist($ordered);
-                    $em->flush();
-                }
-            }
-
-        }
-        catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : Payment_Checkout - " . $e->getMessage());
-            echo 'Exception reçue : ', $e->getMessage(), "\n";
-        }
-    }
-
-
-    /**
      * @Post(
-     *  "/test"
+     *  "/testMail"
      * )
      * @param Request $request
      * @param \Swift_Mailer $mailer
      * Rest\View
      */
-    public function test(Request $request, \Swift_Mailer $mailer)
+    public function testMail(Request $request, \Swift_Mailer $mailer)
     {
         $em = $this->getDoctrine()->getManager();
 
