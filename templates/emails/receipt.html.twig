@@ -1,0 +1,31 @@
+{% extends 'email.html.twig'%}
+
+{% block body %}
+    <p><img src="https://www.novastan.org/fr/wp-content/uploads/sites/4/2018/03/Image1-1.jpg" alt="logo du louvre" /></p>
+    <h1>Résumé de votre commande</h1>
+
+
+        <div>
+            {{ ordered.numberOfTicket }} Billet(s) {% if  ordered.halfDay   %} demi-journée {% else %} journée {% endif %} <br/>
+            Date de visite : {{ ordered.visitDay|date('d-m-Y') }} <br/>
+            Montant total de la commande : {{ ordered.totalPrice }} €<br/>
+            Numéro de commande : {{ ordered.uniqueId }} <br/>
+            {% for ticket in ordered.tickets %}
+        </div>
+
+        <hr/>
+        <div>
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                    <h3 class="display-4">{{ ticket.user.lastname }} {{ ticket.user.firstname }}</h3>
+                    <p class="lead">N°: {{ ticket.uniqueId }}<br/></p>
+                    <p>
+                        Date de naissance : {{ ticket.user.birthDate|date('d-m-Y') }}<br/>
+                        Prix : {{ ticket.price }} €
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+{% endblock %}

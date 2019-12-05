@@ -18,6 +18,8 @@ use FOS\RestBundle\Controller\Annotations\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Yaml;
@@ -78,6 +80,14 @@ class FrontController extends AbstractFOSRestController
                         ->setHalfDay($request->get('half_day'))
                         ->setState(1);
 
+                    $validator = Validation::createValidator();
+                    dump($validator->validate($ordered)); die;
+                    $errors = $validator->validate($ordered);
+
+                    if (count($errors)) {
+                        $view = $this->view($errors, Response::HTTP_BAD_REQUEST);
+                        return $this->handleView($view);
+                    }
 
                     $em = $this->getDoctrine()->getManager();
 
@@ -100,7 +110,7 @@ class FrontController extends AbstractFOSRestController
 
 
         } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date(d - m - Y) . " : initOrder - " . $e->getMessage());
+            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -192,7 +202,8 @@ class FrontController extends AbstractFOSRestController
 
                 $view = $this->view($data, 201);
                 return $this->handleView($view);
-            }
+            } throw $this->createNotFoundException(sprintf('No Ordered for the id ', $request->get('ordered_unique_id')));
+
         } catch (\Exception $e) {
             fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : validOrder - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
@@ -207,7 +218,7 @@ class FrontController extends AbstractFOSRestController
      * @param Request $request
      * @Rest\View
      */
-    public function payment(Request $request)
+    public function payment(Request $request, \Swift_Mailer $mailer)
     {
         try{
             $em = $this->getDoctrine()->getManager();
@@ -234,6 +245,24 @@ class FrontController extends AbstractFOSRestController
                 $em->persist($ordered);
                 $em->flush();
 
+                if($intent->status == "succeeded")
+                {
+                    $message = (new \Swift_Message('Billeterie du Louvre'))
+                        ->setFrom('mobyteck@gmail.com')
+                        ->setTo($ordered->getEmail())
+                        ->setBody(
+                            $this->renderView(
+                                'emails/receipt.html.twig',
+                                ['ordered' => $ordered]
+                            ),
+                            'text/html'
+                        )
+                    ;
+
+                    session_destroy();
+                    $resultMail = $mailer->send($message,$failures);
+                }
+
                 $data = [
                   "status" => $intent->status
                 ];
@@ -242,7 +271,6 @@ class FrontController extends AbstractFOSRestController
                 $view = $this->view($data, 201);
                 return $this->handleView($view);
             }
-            
         }
         catch(\Exception $e) {
             fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : Payment - " . $e->getMessage());
@@ -307,4 +335,43 @@ class FrontController extends AbstractFOSRestController
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
+
+
+    /**
+     * @Post(
+     *  "/test"
+     * )
+     * @param Request $request
+     * @param \Swift_Mailer $mailer
+     * Rest\View
+     */
+    public function test(Request $request, \Swift_Mailer $mailer)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //Init ordered with unique_id
+        $uniqueId = $request->get('ordered_unique_id');
+
+        $ordered = $this->getDoctrine()
+            ->getRepository(Ordered::class)
+            ->findOneBy(array("uniqueId" => $uniqueId));
+
+
+        $message = (new \Swift_Message('Billeterie du Louvre'))
+            ->setFrom('mobyteck@gmail.com')
+            ->setTo($ordered->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/receipt.html.twig',
+                    ['ordered' => $ordered]
+                ),
+                'text/html'
+            )
+        ;
+
+        $result = $mailer->send($message);
+
+        return $this->render('emails/receipt.html.twig', ['ordered' => $ordered]);
+    }
+
 }

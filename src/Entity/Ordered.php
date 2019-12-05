@@ -29,9 +29,7 @@ class Ordered
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Email(
-     *     message = "This email '{{ value }}' is not valid email"
-     * )
+     * @Assert\Blank
      */
     private $email;
 

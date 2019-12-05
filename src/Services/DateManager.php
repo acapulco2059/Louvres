@@ -11,7 +11,7 @@ class DateManager
     private $holiday = [];
 
     public function __construct(){
-        $dates = Yaml::parseFile('../configDate.yaml');
+        $dates = Yaml::parseFile('configDate.yaml');
         $this->openDay = $dates["open"];
         foreach ($dates["holiday"] as $key => $value) {
             $valueTmp = explode("/",$value);
@@ -37,5 +37,3 @@ class DateManager
         return false;
     }
 }
-
-// DateManager->isOpened(dateDuFomulaire)
