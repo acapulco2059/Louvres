@@ -6,6 +6,12 @@ use PHPUnit\Framework\TestCase;
 
 class TicketPriceTest extends TestCase
 {
+    // Inclure fichier YAML pour le prix des billets
+    public function __construct()
+    {
+
+    }
+
     public function testUserPriceBaby()
     {
         $age = new TicketPrice();

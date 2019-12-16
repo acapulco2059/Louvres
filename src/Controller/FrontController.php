@@ -28,9 +28,8 @@ use Symfony\Component\Yaml\Yaml;
 class FrontController extends AbstractFOSRestController
 {
     /**
-     * @Get(
-     *     path="/",
-     *     name="home"
+     * @Rest\Get(
+     *     "/"
      * )
      * @View
      */
@@ -41,7 +40,9 @@ class FrontController extends AbstractFOSRestController
 
         $value = $priceValue + $dateValue;
 
-        return $value;
+        $view = $this->view($value, 200)
+            ->setTemplate('public/index.html');
+        return $view;
     }
 
     /**
@@ -81,7 +82,6 @@ class FrontController extends AbstractFOSRestController
                         ->setState(1);
 
                     $validator = Validation::createValidator();
-                    dump($validator->validate($ordered)); die;
                     $errors = $validator->validate($ordered);
 
                     if (count($errors)) {
@@ -110,7 +110,7 @@ class FrontController extends AbstractFOSRestController
 
 
         } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage());
+            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage()) ."\n";
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -205,7 +205,7 @@ class FrontController extends AbstractFOSRestController
             } throw $this->createNotFoundException(sprintf('No Ordered for the id ', $request->get('ordered_unique_id')));
 
         } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : validOrder - " . $e->getMessage());
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : validOrder - " . $e->getMessage(). "\n");
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -241,7 +241,8 @@ class FrontController extends AbstractFOSRestController
                 ]);
 
 
-                $ordered->setStripeId($intent->id);
+                $ordered->setStripeId($intent->id)
+                    ->setState(3);
                 $em->persist($ordered);
                 $em->flush();
 

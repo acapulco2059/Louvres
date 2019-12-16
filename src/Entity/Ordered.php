@@ -29,7 +29,7 @@ class Ordered
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Blank
+     * @Assert\Blank()
      */
     private $email;
 
