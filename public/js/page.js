@@ -3,26 +3,42 @@ class Page{
         this.url = url;
         this.domContainer = domContainer;
         this.step=1;
+        this.content;
+        this.initData = null;
+        this.orderData;
+        this.visitorData;
         window.louvres.page = this;
         this.domContainer.innerHTML = this.loading();
 
         this.render();
     };
 
-    render(){
-        this.domContainer.innerHTML= this[`template${this.step}`]();
+    async render(){
+        var datainit = await this[`template${this.step}`]();
+        this.domContainer.innerHTML = datainit;
     }
 
     async init(){
-        let answer  = await fetch(`http://${this.url}`, {method: 'GET'});
-        let content = await answer.json();
-        return content;
+        var answer  = await fetch(`http://${this.url}`, {method: 'GET'});
+        this.initData = await answer.json();
+    }
+
+    async postAPI(data, url){
+        let answer = await fetch(`http://${this.url}/${url}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        this.content = await answer.json();
     }
 
 
 
-    template1(){
-        this.init().then(content => console.log(content.open));
+    async template1(){
+        await this.init();
 
         // DatePicker Init
         jQuery(function($){
@@ -33,20 +49,68 @@ class Page{
             });
 
         });
-
         return `
-		<input id="email" name="email" placeholder="exemple@louvre.fr">
-		<input id="numberOfTicket" name="numberOfTicket" placeholder="1">
-		<label for="datepicker">Date de visite</label>
-		<input type="text" id="visitDay">
-        <label for="halfday">Demi-journée</label>
-		<input type="checkbox" id="halfday" name="halfday">
-		<button onclick="louvres.page.stepChange()">Validez</button>
-		`;
+        <section id='form1'>
+            <div class='fields'>
+                <div class='field'>
+                    <label for='email' >Email</label>
+                    <input type='text' name='email' id='email' placeholder='exemple@exemple.com'required/>
+                </div>
+                <div class='field half'>
+                    <label for='numberOfTicket' >Quantité</label>
+                    <input type='text' name='numberOfTicket' id='numberOfTicket' placeholder='1' required  />
+                </div>
+                <div class='field half'>
+                    <label for='visitDay' >Date de la visite</label>
+                    <input type='text' name='visitDay' id='visitDay' placeholder='AAAA/MM/JJ' required />
+                </div>
+                <div class='field half'>
+                    <input type='checkbox' id='halfday' />
+                    <label for='halfday' >Demi-Journée (de 14h à 20h)</label>
+                </div>
+            </div>
+                <button onclick="louvres.page.stepChange()">Validez</button>
+         </section>`;
     }
 
-    template2(){
-         console.log(content.number_of_ticket);
+    async template2(){
+
+        // DatePicker Init
+        jQuery(function($){
+            $('#birthday').datepicker({
+                dateFormat: "yy/mm/dd",
+                maxDate: -30
+            });
+
+        });
+
+        return `
+            <section id='form2'>
+                <h4>Visiteur</h4>
+                <div class=''>
+                    <div class=''>
+                        <label for='lastname'>Nom</label>
+                        <input type='text' name='lastname' id='lastname' placeholder='Dupont' required />
+                    </div>
+                    <div class=''>
+                        <label for='name' >Prénom</label>
+                        <input type='text' name='firstname' id='firstname' placeholder='Jean' required />
+                    </div>
+                    <div class=''>
+                        <label for='birthday' >Date de naissance</label>
+                        <input type='text' name='birthday' id='birthday' placeholder='JJ/MM/AAAA' required;/>
+                    </div>
+                    <div class=''>
+                        <input type='checkbox' id='reduice' />
+                        <label for='reduice' >Tarif réduit (Avec justificatif)</label>
+                    </div>
+                </div>
+                <button onclick="louvres.page.stepChange()">Validez</button>
+            </section>`;
+    }
+
+    async template3(){
+
     }
 
     async stepChange(){
@@ -54,10 +118,9 @@ class Page{
             case 1:
                 //this.domContainer.innerHTML = this.loading();
                 let halfday = document.getElementById('halfday');
-                let visitDay = document.getElementById('visitDay').value;
 
                 // Array data to Post
-                let collectedData = {
+                let orderData = {
                     email: document.getElementById('email').value,
                     number_of_ticket: parseInt(document.getElementById('numberOfTicket').value, 10),
                     visit_day: document.getElementById('visitDay').value,
@@ -65,26 +128,35 @@ class Page{
                     total_price: 0,
                 }
 
-                console.log(collectedData);
-                //je fait une requete à mon serveur en lui envoyant collectedData
-                const answer = await fetch(`http://${this.url}/initOrder`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(collectedData)
-                });
-                var content = await answer.json();
-
-                console.log(content);
+                await this.postAPI(orderData,'initOrder');
+                this.orderData = await this.content;
 
                 //on change d'étape
                 this.step++;
                 this.render();
                 break;
+
             case 2:
-                return 'je suis à l\'étape 2';
+                let reduice = document.getElementById('reduice');
+                console.log(this.orderData.ordered_unique_id);
+
+                var visitorData = {
+                    ordered_unique_id: this.orderData.ordered_unique_id,
+                    visitor:[{
+                        lastname: document.getElementById('lastname').value,
+                        firstname: document.getElementById('firstname').value,
+                        birthday: document.getElementById('birthday').value,
+                        country: 75,
+                        reduice: reduice.checked
+                    }
+                    ]
+                };
+
+                await this.postAPI(visitorData, 'validOrder');
+                this.visitorData = await this.content;
+
+                this.step++;
+                this.render();
                 break;
         }
     }

@@ -81,14 +81,6 @@ class FrontController extends AbstractFOSRestController
                         ->setHalfDay($request->get('half_day'))
                         ->setState(1);
 
-                    $validator = Validation::createValidator();
-                    $errors = $validator->validate($ordered);
-
-                    if (count($errors)) {
-                        $view = $this->view($errors, Response::HTTP_BAD_REQUEST);
-                        return $this->handleView($view);
-                    }
-
                     $em = $this->getDoctrine()->getManager();
 
                     //set Order in BDD with doctrine
@@ -205,7 +197,7 @@ class FrontController extends AbstractFOSRestController
             } throw $this->createNotFoundException(sprintf('No Ordered for the id ', $request->get('ordered_unique_id')));
 
         } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : validOrder - " . $e->getMessage(). "\n");
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : validOrder - " . $e->getMessage(). "\n");
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -272,7 +264,7 @@ class FrontController extends AbstractFOSRestController
             }
         }
         catch(\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date(d-m-Y) . " : Payment - " . $e->getMessage());
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : Payment - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }

@@ -13,7 +13,7 @@ class TicketPrice
 
     public function __construct()
     {
-        $value = Yaml::parseFile('configPrice.yaml');
+        $value = Yaml::parseFile('../configPrice.yaml');
         $this->price["baby"] = $value["price"]["baby"];
         $this->price["children"] = $value["price"]["children"];
         $this->price["normal"] = $value["price"]["normal"];
