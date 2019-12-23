@@ -47,3 +47,9 @@ https://github.com/doctrine/DoctrineBundle/issues/673
 19-12-2019 : validOrder - Notice: Undefined index: firstname
 19-12-2019 : validOrder - Notice: Undefined index: firstname
 19-12-2019 : validOrder - Notice: Undefined index: firstname
+23-12-2019 : validOrder - Warning: count(): Parameter must be an array or an object that implements Countable
+23-12-2019 : validOrder - Warning: count(): Parameter must be an array or an object that implements Countable
+23-12-2019 : validOrder - Warning: count(): Parameter must be an array or an object that implements Countable
+23-12-2019 : validOrder - Warning: count(): Parameter must be an array or an object that implements Countable
+23-12-2019 : validOrder - Notice: Undefined offset: 0
+23-12-2019 : validOrder - Notice: Undefined offset: 0

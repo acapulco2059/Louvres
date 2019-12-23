@@ -1,29 +1,107 @@
 class Page{
     constructor(domContainer, url){
-        this.url = url;
-        this.domContainer = domContainer;
-        this.step=1;
+        this.url            = url;
+        this.domContainer   = domContainer;
         this.content;
-        this.initData = null;
+        this.initData       = null; //main data (price + date + etc.)
         this.orderData;
         this.visitorData;
         window.louvres.page = this;
-        this.domContainer.innerHTML = this.loading();
+        this.render("loading");
 
-        this.render();
+        this.initOrder_initialize();
     };
 
-    async render(){
-        var datainit = await this[`template${this.step}`]();
-        this.domContainer.innerHTML = datainit;
+    /**
+     * get main data and 1st render
+     * @return {[type]} [description]
+     */
+    async initOrder_initialize(){
+        var answer    = await fetch(`http://${this.url}`, {method: 'GET'});
+        this.initData = await answer.json();
+        this.observer = new MutationObserver(()=>{this.initOrder_datepickerInit()});
+        this.observer.observe(this.domContainer, { attributes: false, childList: true });
+        this.render("initOrder");
     }
 
-    async init(){
-        var answer  = await fetch(`http://${this.url}`, {method: 'GET'});
-        this.initData = await answer.json();
+    initOrder_datepickerInit(){
+        const picker = datepicker('visitDay', {
+            customDays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+        });
+    }
+
+    initOrder_finalize(){
+        //this.domContainer.innerHTML = this.loading();
+        let halfday = document.getElementById('halfday');
+
+        // Array data to Post
+        let orderData = {
+            email: document.getElementById('email').value,
+            number_of_ticket: parseInt(document.getElementById('numberOfTicket').value, 10),
+            visit_day: document.getElementById('visitDay').value,
+            half_day: halfday.checked,
+            total_price: 0,
+        }
+
+        this.visitorsList_initialize(orderData);
+        this.observer.disconnect()
+    }
+
+    async visitorsList_initialize(orderData){
+        await this.postAPI(orderData,'initOrder');
+        this.orderData = await this.content;
+        this.observer  = new MutationObserver(()=>{this.visitorsList_datepickerInit()});
+        this.observer.observe(this.domContainer, { attributes: false, childList: true });
+        this.render("visitorsList");
+    }1
+
+    visitorsList_datepickerInit(){
+        const datepickers = [];
+        for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
+            datepickers[i] = datepicker(`birthday${id}`, options)
+        }
+    }
+
+    visitorsList_finalize(){
+        let numberOfTicket = this.orderData.number_of_ticket;
+
+        let visitor = [];
+        for(let j=1 ; j <= numberOfTicket; j++) {
+            let reduice = document.getElementById(`reduice${j}`);
+
+            var visitorData = {
+                    lastname: document.getElementById(`lastname${j}`).value,
+                    firstname: document.getElementById(`firstname${j}`).value,
+                    birthday: document.getElementById(`birthday${j}`).value,
+                    country: 75,
+                    reduice: reduice.checked
+                };
+                visitor.push(visitorData);
+        }
+        console.log(visitor)
+
+
+        var visitorData = {
+                ordered_unique_id: this.orderData.ordered_unique_id,
+                visitor: visitor
+            }
+
+        this.stripeStep_initialize(visitorData);
+    }
+
+    async stripeStep_initialize(visitorData){
+        await this.postAPI(visitorData, 'validOrder');
+        this.visitorData = await this.content;
+        this.render("stripeStep");
+    }
+
+    render(step){
+        this.domContainer.innerHTML = this[`template_${step}`]();
     }
 
     async postAPI(data, url){
+        this.render("loading");
         let answer = await fetch(`http://${this.url}/${url}`, {
             method: 'POST',
             headers: {
@@ -37,18 +115,8 @@ class Page{
 
 
 
-    async template1(){
-        await this.init();
+    template_initOrder(){
 
-        // DatePicker Init
-        jQuery(function($){
-            $('#visitDay').datepicker({
-                dateFormat: "yy/mm/dd",
-                minDate: 0,
-                maxDate: 365,
-            });
-
-        });
         return `
         <section id='form1'>
             <div class='fields'>
@@ -69,103 +137,58 @@ class Page{
                     <label for='halfday' >Demi-Journée (de 14h à 20h)</label>
                 </div>
             </div>
-                <button onclick="louvres.page.stepChange()">Validez</button>
+                <button onclick="louvres.page.initOrder_finalize()">Validez</button>
          </section>`;
     }
 
-    async template2(){
-
-        // DatePicker Init
-        jQuery(function($){
-            $('#birthday').datepicker({
-                dateFormat: "yy/mm/dd",
-                maxDate: -30
-            });
-
-        });
+    template_visitorsList(){
+        var str = "";
+        for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
+            str += this.template_visitorsListPartial(i);
+        }
 
         return `
             <section id='form2'>
-                <h4>Visiteur</h4>
-                <div class=''>
-                    <div class=''>
-                        <label for='lastname'>Nom</label>
-                        <input type='text' name='lastname' id='lastname' placeholder='Dupont' required />
-                    </div>
-                    <div class=''>
-                        <label for='name' >Prénom</label>
-                        <input type='text' name='firstname' id='firstname' placeholder='Jean' required />
-                    </div>
-                    <div class=''>
-                        <label for='birthday' >Date de naissance</label>
-                        <input type='text' name='birthday' id='birthday' placeholder='JJ/MM/AAAA' required;/>
-                    </div>
-                    <div class=''>
-                        <input type='checkbox' id='reduice' />
-                        <label for='reduice' >Tarif réduit (Avec justificatif)</label>
-                    </div>
-                </div>
-                <button onclick="louvres.page.stepChange()">Validez</button>
+                ${str}
+                <button onclick="louvres.page.visitorsList_finalize()">Validez</button>
             </section>`;
     }
 
-    async template3(){
+    template_visitorsListPartial(id){
 
+        return `
+            <h4>Visiteur ${id}</h4>
+            <div class=''>
+                <div class=''>
+                    <label for='lastname'>Nom</label>
+                    <input type='text' name='lastname${id}' id='lastname${id}' placeholder='Dupont' required />
+                </div>
+                <div class=''>
+                    <label for='name' >Prénom</label>
+                    <input type='text' name='firstname${id}' id='firstname${id}' placeholder='Jean' required />
+                </div>
+                <div class=''>
+                    <label for='birthday' >Date de naissance</label>
+                    <input type='text' name='birthday${id}' id='birthday${id}' placeholder='JJ/MM/AAAA' required;/>
+                </div>
+                <div class=''>
+                    <input type='checkbox' id='reduice${id}'/>
+                    <label for='reduice' >Tarif réduit (Avec justificatif)</label>
+                </div>
+            </div>`;
     }
 
-    async stepChange(){
-        switch(this.step){
-            case 1:
-                //this.domContainer.innerHTML = this.loading();
-                let halfday = document.getElementById('halfday');
-
-                // Array data to Post
-                let orderData = {
-                    email: document.getElementById('email').value,
-                    number_of_ticket: parseInt(document.getElementById('numberOfTicket').value, 10),
-                    visit_day: document.getElementById('visitDay').value,
-                    half_day: halfday.checked,
-                    total_price: 0,
-                }
-
-                await this.postAPI(orderData,'initOrder');
-                this.orderData = await this.content;
-
-                //on change d'étape
-                this.step++;
-                this.render();
-                break;
-
-            case 2:
-                let reduice = document.getElementById('reduice');
-                console.log(this.orderData.ordered_unique_id);
-
-                var visitorData = {
-                    ordered_unique_id: this.orderData.ordered_unique_id,
-                    visitor:[{
-                        lastname: document.getElementById('lastname').value,
-                        firstname: document.getElementById('firstname').value,
-                        birthday: document.getElementById('birthday').value,
-                        country: 75,
-                        reduice: reduice.checked
-                    }
-                    ]
-                };
-
-                await this.postAPI(visitorData, 'validOrder');
-                this.visitorData = await this.content;
-
-                this.step++;
-                this.render();
-                break;
-        }
-    }
-
-    loading(){
+    template_loading(){
         return `
 		je suis en train de charger
 		`;
 
+    }
+
+    template_stripeStep(){
+        return `
+        todo template_stripeStep
+        `;
     }
 
 };

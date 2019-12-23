@@ -140,7 +140,8 @@ class FrontController extends AbstractFOSRestController
                     $user->setFirstname($visitor[$i]['firstname'])
                         ->setLastname($visitor[$i]['lastname'])
                         ->setBirthDate($birthday)
-                        ->setCountryId($visitor[$i]['country']);
+                        ->setCountryId($visitor[$i]['country'])
+                        ->setReduice($visitor[$i]['reduice']);
 
                     $ticket->setUser($user)
                         ->setPrice($userPrice);
@@ -187,9 +188,9 @@ class FrontController extends AbstractFOSRestController
 
                 // Array for the View
                 $data = [
-                    'users' => $users,
+                    'ordered_unique_id' => $ordered->getUniqueId(),
                     'total_price' => $ordered->getTotalPrice(),
-                    'ordered_unique_id' => $ordered->getUniqueId()
+                    'users' => $users
                 ];
 
                 $view = $this->view($data, 201);

@@ -45,6 +45,11 @@ class User
      * @ORM\JoinColumn(name="country_id", referencedColumnName="id")
      */
     private $countryId;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $reduice;
     
 
     public function __construct()
@@ -118,6 +123,18 @@ class User
     public function setCountryId(int $countryId): self
     {
         $this->countryId = $countryId;
+
+        return $this;
+    }
+
+    public function getReduice(): ?bool
+    {
+        return $this->reduice;
+    }
+
+    public function setReduice(bool $reduice): self
+    {
+        $this->reduice = $reduice;
 
         return $this;
     }
