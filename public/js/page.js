@@ -6,6 +6,8 @@ class Page{
         this.initData       = null; //main data (price + date + etc.)
         this.orderData;
         this.visitorData;
+        this.paymentIntentData;
+        this.paymentData;
         window.louvres.page = this;
         this.render("loading");
 
@@ -24,16 +26,37 @@ class Page{
         this.render("initOrder");
     }
 
+    /**
+     *
+     */
     initOrder_datepickerInit(){
-        const picker = datepicker('visitDay', {
-            customDays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-            customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
-        });
+        this.observer.disconnect();
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth();
+        var day = date.getDate();
+        const picker = datepicker('#visitDay', {
+            startDay: 1,
+            customDays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+            customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+            minDate: new Date(),
+            maxDate: new Date(year + 1, month, day),
+            // formatter: (input, date, instance) => {
+            //     const value = date.toLocaleDateString();
+            //     input.value = value;
+            // },
+
+            },
+        );
     }
 
+    /**
+     *
+     */
     initOrder_finalize(){
         //this.domContainer.innerHTML = this.loading();
         let halfday = document.getElementById('halfday');
+        let date = new Date(document.getElementById('visitDay').value);
 
         // Array data to Post
         let orderData = {
@@ -48,21 +71,38 @@ class Page{
         this.observer.disconnect()
     }
 
+    /**
+     *
+     * @param orderData
+     * @returns {Promise<void>}
+     */
     async visitorsList_initialize(orderData){
         await this.postAPI(orderData,'initOrder');
         this.orderData = await this.content;
         this.observer  = new MutationObserver(()=>{this.visitorsList_datepickerInit()});
         this.observer.observe(this.domContainer, { attributes: false, childList: true });
         this.render("visitorsList");
-    }1
+    }
 
+    /**
+     *
+     */
     visitorsList_datepickerInit(){
+        this.observer.disconnect();
         const datepickers = [];
         for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
-            datepickers[i] = datepicker(`birthday${id}`, options)
+            datepickers[i] = datepicker(`#birthday${i}`, {
+                startDay: 1,
+                customDays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                maxDate: new Date(),
+            })
         }
     }
 
+    /**
+     *
+     */
     visitorsList_finalize(){
         let numberOfTicket = this.orderData.number_of_ticket;
 
@@ -70,32 +110,50 @@ class Page{
         for(let j=1 ; j <= numberOfTicket; j++) {
             let reduice = document.getElementById(`reduice${j}`);
 
-            var visitorData = {
-                    lastname: document.getElementById(`lastname${j}`).value,
-                    firstname: document.getElementById(`firstname${j}`).value,
-                    birthday: document.getElementById(`birthday${j}`).value,
-                    country: 75,
-                    reduice: reduice.checked
-                };
-                visitor.push(visitorData);
+            var visitorDatas = {
+                lastname: document.getElementById(`lastname${j}`).value,
+                firstname: document.getElementById(`firstname${j}`).value,
+                birthday: document.getElementById(`birthday${j}`).value,
+                country: 75,
+                reduice: reduice.checked
+            };
+            visitor.push(visitorDatas);
         }
-        console.log(visitor)
 
+        var visitorsDatas = {
+            ordered_unique_id: this.orderData.ordered_unique_id,
+            visitor: visitor
+        }
 
-        var visitorData = {
-                ordered_unique_id: this.orderData.ordered_unique_id,
-                visitor: visitor
-            }
-
-        this.stripeStep_initialize(visitorData);
+        this.stripeStep_initialize(visitorsDatas);
     }
 
-    async stripeStep_initialize(visitorData){
-        await this.postAPI(visitorData, 'validOrder');
+    /**
+     *
+     * @param visitorsDatas
+     * @returns {Promise<void>}
+     */
+    async stripeStep_initialize(visitorsDatas){
+        await this.postAPI(visitorsDatas, 'validOrder');
         this.visitorData = await this.content;
+        await this.postAPI(visitorsDatas, 'initPayment');
+        this.paymentIntentData = await this.content;
         this.render("stripeStep");
     }
 
+    async stripeStep_payment(){
+        var stripeData = {
+            ordered_unique_id: this.orderData.ordered_unique_id,
+            payment_intent_id: this.paymentIntentData.id
+        };
+        await this.postAPI(stripeData, 'payment');
+        this.paymentData = await this.content;
+    }
+
+    /**
+     *
+     * @param step
+     */
     render(step){
         this.domContainer.innerHTML = this[`template_${step}`]();
     }
@@ -178,6 +236,64 @@ class Page{
             </div>`;
     }
 
+    template_stripeStep(){
+        let headDom = document.querySelector('head');
+        let stripeScript = document.createElement('script');
+        stripeScript.src = 'js/client.js';
+        headDom.appendChild(stripeScript);
+
+        var summary = "";
+        for (let i = 0; i < this.orderData.number_of_ticket; i++){
+            summary += this.template_stripeStepPartial(i);
+        }
+
+        return `
+        <h3 class="orderTitle">Résumé de votre comamnde</h3>
+        <section>
+        ${summary}
+        <div class="">
+            <span class="">Total de la commande :</span> ${this.visitorData.total_price}
+        </div>
+        </section>
+        
+        <div id="card_form">
+            <div id="card-element">
+              <!-- Elements will create input elements here -->
+            </div>
+            
+            <!-- We'll put the error messages in this element -->
+            <div id="card-errors" role="alert"></div>
+                        
+            <button id="submit">Payez ${this.visitorData.total_price} €</button>        
+        </div>
+
+        `;
+    }
+
+    template_stripeStepPartial(i){
+
+        return `
+        <div class="">
+            <div class="">
+            Visiteur n°${i + 1}
+            </div>
+            <div class="">
+                <span class="">Nom :</span> ${this.visitorData.users[i].lastname}
+            </div>
+            <div class="">
+                <span class="">Prénom :</span> ${this.visitorData.users[i].firstname}
+            </div>
+            <div class="">
+                <span class="">Prix du billet :</span> ${this.visitorData.users[i].price} €
+            </div>
+            <div class="">
+                <span class="">Numéro de billet :</span> ${this.visitorData.users[i].unique_id}
+            </div>
+        </div>
+        `;
+    }
+
+
     template_loading(){
         return `
 		je suis en train de charger
@@ -185,10 +301,6 @@ class Page{
 
     }
 
-    template_stripeStep(){
-        return `
-        todo template_stripeStep
-        `;
-    }
+
 
 };

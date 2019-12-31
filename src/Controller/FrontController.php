@@ -109,7 +109,7 @@ class FrontController extends AbstractFOSRestController
 
 
     /**
-     * @Post(
+     * @Rest\Post(
      *     "/validOrder"
      * )
      * @param Request $request
@@ -205,13 +205,13 @@ class FrontController extends AbstractFOSRestController
 
 
     /**
-     * @Post(
-     *     "/payment"
+     * @Rest\Post(
+     *     "/initPayment"
      * )
      * @param Request $request
      * @Rest\View
      */
-    public function payment(Request $request, \Swift_Mailer $mailer)
+    public function initPayment(Request $request)
     {
         try{
             $em = $this->getDoctrine()->getManager();
@@ -234,10 +234,53 @@ class FrontController extends AbstractFOSRestController
                 ]);
 
 
-                $ordered->setStripeId($intent->id)
+                $ordered->setStripeId($intent->client_secret)
                     ->setState(3);
                 $em->persist($ordered);
                 $em->flush();
+
+                $data = [
+                    'id' => $intent->id,
+                    'clientSecret' => $intent->client_secret
+                ];
+
+
+                $view = $this->view($data, 201);
+                return $this->handleView($view);
+            }
+        }
+        catch(\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : Payment - " . $e->getMessage());
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
+        }
+    }
+
+    /**
+     * @Rest\Post(
+     *     "/payment"
+     * )
+     * @param Request $request
+     * @param \Swift_Mailer $mailer
+     * @Rest\View
+     */
+    public function payment(Request $request, \Swift_Mailer $mailer)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+
+            //Init ordered with unique_id
+            $uniqueId = $request->get('ordered_unique_id');
+            $paymentIntentId = $request->get('payment_intent_id');
+
+            if(!empty($uniqueId))
+            {
+                $ordered = $this->getDoctrine()
+                    ->getRepository(Ordered::class)
+                    ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
+
+                \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
+
+                $intent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
 
                 if($intent->status == "succeeded")
                 {
