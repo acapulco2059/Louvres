@@ -41,7 +41,7 @@ class FrontController extends AbstractFOSRestController
         $value = $priceValue + $dateValue;
 
         $view = $this->view($value, 200)
-            ->setTemplate('public/index.html');
+            ->setTemplate('public/billetterie.html');
         return $view;
     }
 

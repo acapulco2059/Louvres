@@ -28,7 +28,7 @@ card.addEventListener('change', function(event) {
 });
 
 var submitButton = document.getElementById('submit');
-var client = window.louvres.page.paymentData.clientSecret;
+var client = window.louvres.page.paymentIntentData.clientSecret;
 
 submitButton.addEventListener('click', function(ev) {
 

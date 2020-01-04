@@ -176,26 +176,27 @@ class Page{
     template_initOrder(){
 
         return `
+        <h3 class="text-center">Billetterie en Ligne du Musée du Louvre</h3>
         <section id='form1'>
-            <div class='fields'>
-                <div class='field'>
+            <div class='col-md-12'>
+                <div class="col-md-6">
                     <label for='email' >Email</label>
-                    <input type='text' name='email' id='email' placeholder='exemple@exemple.com'required/>
+                    <input class="form-control" type='text' name='email' id='email' placeholder='exemple@exemple.com'required/>
                 </div>
-                <div class='field half'>
+                <div class='col-md-6'>
                     <label for='numberOfTicket' >Quantité</label>
-                    <input type='text' name='numberOfTicket' id='numberOfTicket' placeholder='1' required  />
+                    <input class="form-control" type='text' name='numberOfTicket' id='numberOfTicket' placeholder='1' required/>
                 </div>
-                <div class='field half'>
+                <div class='col-md-6'>
                     <label for='visitDay' >Date de la visite</label>
-                    <input type='text' name='visitDay' id='visitDay' placeholder='AAAA/MM/JJ' required />
+                    <input class="form-control" type='text' name='visitDay' id='visitDay' placeholder='AAAA/MM/JJ' required/>
                 </div>
-                <div class='field half'>
-                    <input type='checkbox' id='halfday' />
-                    <label for='halfday' >Demi-Journée (de 14h à 20h)</label>
+                <div class='col-md-6'>
+                    <label class="form-check-label" for='halfday' >Demi-Journée (de 14h à 20h)</label>
+                    <input class="form-check-input" type='checkbox' id='halfday' />
                 </div>
             </div>
-                <button onclick="louvres.page.initOrder_finalize()">Validez</button>
+                <button type="button" onclick="louvres.page.initOrder_finalize()">Validez</button>
          </section>`;
     }
 
@@ -216,22 +217,22 @@ class Page{
 
         return `
             <h4>Visiteur ${id}</h4>
-            <div class=''>
-                <div class=''>
+            <div class="">            
+                <div class='col-md-6'>
                     <label for='lastname'>Nom</label>
-                    <input type='text' name='lastname${id}' id='lastname${id}' placeholder='Dupont' required />
+                    <input class="form-control" type='text' name='lastname${id}' id='lastname${id}' placeholder='Dupont' required />
                 </div>
-                <div class=''>
+                <div class='col-md-6'>
                     <label for='name' >Prénom</label>
-                    <input type='text' name='firstname${id}' id='firstname${id}' placeholder='Jean' required />
+                    <input class="form-control" type='text' name='firstname${id}' id='firstname${id}' placeholder='Jean' required />
                 </div>
-                <div class=''>
+                <div class='col-md-12'>
                     <label for='birthday' >Date de naissance</label>
-                    <input type='text' name='birthday${id}' id='birthday${id}' placeholder='JJ/MM/AAAA' required;/>
+                    <input class="form-control" type='text' name='birthday${id}' id='birthday${id}' placeholder='JJ/MM/AAAA' required;/>
                 </div>
-                <div class=''>
-                    <input type='checkbox' id='reduice${id}'/>
-                    <label for='reduice' >Tarif réduit (Avec justificatif)</label>
+                <div class='row col-md-12'>
+                    <label class="form-check-label" for='reduice' >Tarif réduit (Avec justificatif)</label>
+                    <input clas="form-check-input" type='checkbox' id='reduice${id}'/>
                 </div>
             </div>`;
     }

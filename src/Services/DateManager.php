@@ -11,7 +11,7 @@ class DateManager
     private $holiday = [];
 
     public function __construct(){
-        $dates = Yaml::parseFile('../configDate.yaml');
+        $dates = Yaml::parseFile(__DIR__.'/../../configDate.yaml');
         $this->openDay = $dates["open"];
         foreach ($dates["holiday"] as $key => $value) {
             $valueTmp = explode("/",$value);
