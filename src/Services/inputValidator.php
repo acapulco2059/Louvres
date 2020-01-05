@@ -6,13 +6,22 @@ namespace App\Services;
 
 class inputValidator
 {
-    function isEmail($email)
+
+    /**
+     * @param $email
+     * @return bool
+     */
+    function isValidEmail($email)
     {
-        $at = strrpos($email, '@');
-        if (!$at || $at === 0) return false;
-        $email = substr($email, $at);
-        $dot = strpos($email, '.');
-        if (!$dot || $dot < 2) return false;
-        return true;
+        if (preg_match("/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/" , $email))
+        {
+            return true;
+        } return false;
+    }
+
+    function isValidNumberOfTicket($numberOfTicket){
+        if(preg_match("/^[0-9]{1,2}$/", $numberOfTicket)){
+            return true;
+        } return false;
     }
 }

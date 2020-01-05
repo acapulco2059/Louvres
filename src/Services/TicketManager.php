@@ -19,7 +19,7 @@ class TicketManager
      */
     public function __construct()
     {
-        $this->date = Yaml::parseFile('../configDate.yaml');
+        $this->date = Yaml::parseFile(__DIR__.'/../../configDate.yaml');
     }
 
     /**

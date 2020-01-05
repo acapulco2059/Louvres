@@ -6,11 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class TicketPriceTest extends TestCase
 {
-    // Inclure fichier YAML pour le prix des billets
-    public function __construct()
-    {
 
-    }
+    // Amélioration, inclure le fichier YAML pour modifier les prix des billets automatiquement
 
     public function testUserPriceBaby()
     {
@@ -32,4 +29,5 @@ class TicketPriceTest extends TestCase
 
         $this->assertSame(10, $age->userPrice('1985-10-14', true));
     }
+
 }

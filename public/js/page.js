@@ -6,7 +6,6 @@ class Page{
         this.initData       = null; //main data (price + date + etc.)
         this.orderData;
         this.visitorData;
-        this.paymentIntentData;
         this.paymentData;
         window.louvres.page = this;
         this.render("loading");
@@ -30,24 +29,33 @@ class Page{
      *
      */
     initOrder_datepickerInit(){
+        const initDate = this.initData.holiday;
+        const open = this.initData.open;
+        console.log(open);
+        let holiday = [];
+
+        initDate.forEach(element => {
+            let date = new Date();
+            let valueTemp = element.split('/');
+            if(valueTemp.length == 2){
+                element = date.getFullYear() + '/' + element;
+            }
+            holiday.push(element);
+        });
+
         this.observer.disconnect();
         var date = new Date();
         var year = date.getFullYear();
         var month = date.getMonth();
         var day = date.getDate();
-        const picker = datepicker('#visitDay', {
-            startDay: 1,
-            customDays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-            customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-            minDate: new Date(),
-            maxDate: new Date(year + 1, month, day),
-            // formatter: (input, date, instance) => {
-            //     const value = date.toLocaleDateString();
-            //     input.value = value;
-            // },
-
-            },
-        );
+        $('#visitDay').datepicker({
+            format: 'yyyy/mm/dd',
+            keyboardNavigation: false,
+            datesDisabled: holiday,
+            startDate: 'd',
+            endDate: '+365d',
+            language: "fr",
+        });
     }
 
     /**
@@ -91,12 +99,12 @@ class Page{
         this.observer.disconnect();
         const datepickers = [];
         for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
-            datepickers[i] = datepicker(`#birthday${i}`, {
-                startDay: 1,
-                customDays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-                customMonths: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-                maxDate: new Date(),
-            })
+            $('#birthday'+i).datepicker({
+                format: 'yyyy/mm/dd',
+                endDate: 'd',
+                language: "fr",
+            });
+
         }
     }
 
@@ -136,15 +144,13 @@ class Page{
     async stripeStep_initialize(visitorsDatas){
         await this.postAPI(visitorsDatas, 'validOrder');
         this.visitorData = await this.content;
-        await this.postAPI(visitorsDatas, 'initPayment');
-        this.paymentIntentData = await this.content;
         this.render("stripeStep");
     }
 
     async stripeStep_payment(){
         var stripeData = {
             ordered_unique_id: this.orderData.ordered_unique_id,
-            payment_intent_id: this.paymentIntentData.id
+            payment_intent_id: this.visitorData.stripe_id
         };
         await this.postAPI(stripeData, 'payment');
         this.paymentData = await this.content;
@@ -178,25 +184,27 @@ class Page{
         return `
         <h3 class="text-center">Billetterie en Ligne du Musée du Louvre</h3>
         <section id='form1'>
-            <div class='col-md-12'>
-                <div class="col-md-6">
+            <div class='col-md-6'>
+                <div class="col-md-12">
                     <label for='email' >Email</label>
                     <input class="form-control" type='text' name='email' id='email' placeholder='exemple@exemple.com'required/>
                 </div>
-                <div class='col-md-6'>
+                <div class='col-md-12'>
                     <label for='numberOfTicket' >Quantité</label>
-                    <input class="form-control" type='text' name='numberOfTicket' id='numberOfTicket' placeholder='1' required/>
+                    <input class="form-control" type='text' name='numberOfTicket' id='numberOfTicket' value='1' required/>
                 </div>
-                <div class='col-md-6'>
+                <div class='col-md-12'>
                     <label for='visitDay' >Date de la visite</label>
-                    <input class="form-control" type='text' name='visitDay' id='visitDay' placeholder='AAAA/MM/JJ' required/>
+                    <div class="input-group date">
+                      <input type="text" id='visitDay' class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                    </div>
                 </div>
-                <div class='col-md-6'>
+                <div class='col-md-12'>
                     <label class="form-check-label" for='halfday' >Demi-Journée (de 14h à 20h)</label>
                     <input class="form-check-input" type='checkbox' id='halfday' />
                 </div>
+                 <button class='col-md-6' type="button" onclick="louvres.page.initOrder_finalize()">Validez</button>
             </div>
-                <button type="button" onclick="louvres.page.initOrder_finalize()">Validez</button>
          </section>`;
     }
 
@@ -228,7 +236,9 @@ class Page{
                 </div>
                 <div class='col-md-12'>
                     <label for='birthday' >Date de naissance</label>
-                    <input class="form-control" type='text' name='birthday${id}' id='birthday${id}' placeholder='JJ/MM/AAAA' required;/>
+                    <div class="input-group date">
+                      <input type="text" id='birthday${id}' class="form-control" required><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                    </div>
                 </div>
                 <div class='row col-md-12'>
                     <label class="form-check-label" for='reduice' >Tarif réduit (Avec justificatif)</label>

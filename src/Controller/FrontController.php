@@ -7,6 +7,7 @@ use App\Entity\Ordered;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Services\DateManager;
+use App\Services\inputValidator;
 use App\Services\TicketPrice;
 use App\Services\TicketManager;
 use Doctrine\ORM\QueryBuilder;
@@ -59,6 +60,7 @@ class FrontController extends AbstractFOSRestController
             $ordered = new Ordered();
             $dateManager = new DateManager();
             $ticketManager = new TicketManager();
+            $inputValidator = new inputValidator();
 
             $dateManager->isOpened(new \DateTime($request->get('visit_day')));
 
@@ -69,40 +71,49 @@ class FrontController extends AbstractFOSRestController
             $getCountTicket = intval($getCountTicket['totalTicket']);
 
             //check if the date selected and available
-            if ($dateManager->isOpened(new \DateTime($request->get('visit_day'))))
-            {
+            if ($dateManager->isOpened(new \DateTime($request->get('visit_day')))) {
                 //check if the number of remaining tickets is sufficient
                 if ($ticketManager->availabilityCheck($getCountTicket))
                 {
-                    $ordered->setEmail($request->get('email'))
-                        ->setNumberOfTicket($request->get('number_of_ticket'))
-                        ->setVisitDay(new \DateTime($request->get('visit_day')))
-                        ->setTotalPrice($request->get('total_price'))
-                        ->setHalfDay($request->get('half_day'))
-                        ->setState(1);
+                    // Validate the email
+                    if($inputValidator->isValidEmail($request->get('email')))
+                    {
+                        // Check if the var number of ticket is a number
+                        if($inputValidator->isValidNumberOfTicket($request->get('number_of_ticket')))
+                        {
+                            $ordered->setEmail($request->get('email'))
+                                ->setNumberOfTicket($request->get('number_of_ticket'))
+                                ->setVisitDay(new \DateTime($request->get('visit_day')))
+                                ->setTotalPrice($request->get('total_price'))
+                                ->setHalfDay($request->get('half_day'))
+                                ->setState(1);
 
-                    $em = $this->getDoctrine()->getManager();
+                            $em = $this->getDoctrine()->getManager();
 
-                    //set Order in BDD with doctrine
-                    $em->persist($ordered);
-                    $em->flush();
+                            //set Order in BDD with doctrine
+                            $em->persist($ordered);
+                            $em->flush();
 
-                    //prepares the information to be transmitted
-                    $data = [
-                        "number_of_ticket" => $ordered->getNumberOfTicket(),
-                        "ordered_unique_id" => $ordered->getUniqueId()
-                    ];
+                            //prepares the information to be transmitted
+                            $data = [
+                                "number_of_ticket" => $ordered->getNumberOfTicket(),
+                                "ordered_unique_id" => $ordered->getUniqueId()
+                            ];
 
-                    $view = $this->view($data, 201);
-                    return $this->handleView($view);
+                            $view = $this->view($data, 201);
+                            return $this->handleView($view);
 
-                } return "Pas assez de place";
+                        } return "Ceci n'est pas un nombre";
 
-            } return "Date non disponible";
+                    }return "Email non valide";
+
+                }return "Pas assez de place";
+
+            }return "Date non disponible";
 
 
         } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage()) ."\n";
+            fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage()) . "\n";
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
@@ -159,16 +170,25 @@ class FrontController extends AbstractFOSRestController
 
                 // Creating array for calculated the totalPrice
                 $prices = array();
-                for($k = 0; $k < $numberOfTicket; $k++)
-                {
+                for ($k = 0; $k < $numberOfTicket; $k++) {
                     $price = $getTicket[$k]->getPrice();
                     array_push($prices, $price);
                 }
                 $totalPrice = array_sum($prices);
 
+                // Create a intent Payment in Stripe
+                \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
+
+                $intent = \Stripe\PaymentIntent::create([
+                    'amount' => $totalPrice * 100,
+                    'currency' => 'eur',
+                    'payment_method_types' => ['card'],
+                ]);
+
                 // update Ordered
                 $ordered->setTotalPrice($totalPrice)
                     ->setNumberOfTicket($numberOfTicket)
+                    ->setStripeId($intent->client_secret)
                     ->setState(2);
 
                 // Set ordered in BDD
@@ -177,8 +197,7 @@ class FrontController extends AbstractFOSRestController
 
                 // Creating the Users array for the View
                 $users = array();
-                for($j = 0; $j < $numberOfTicket; $j++)
-                {
+                for ($j = 0; $j < $numberOfTicket; $j++) {
                     $insertUser = array('firstname' => $getTicket[$j]->getUser()->getFirstname(),
                         'lastname' => $getTicket[$j]->getUser()->getLastname(),
                         'unique_id' => $getTicket[$j]->getUniqueId(),
@@ -190,70 +209,22 @@ class FrontController extends AbstractFOSRestController
                 $data = [
                     'ordered_unique_id' => $ordered->getUniqueId(),
                     'total_price' => $ordered->getTotalPrice(),
-                    'users' => $users
+                    'users' => $users,
+                    'stripe_id' => $intent->id,
+                    'stripe_client_secret' => $intent->client_secret
                 ];
-
-                $view = $this->view($data, 201);
-                return $this->handleView($view);
-            } throw $this->createNotFoundException(sprintf('No Ordered for the id ', $request->get('ordered_unique_id')));
-
-        } catch (\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : validOrder - " . $e->getMessage(). "\n");
-            echo 'Exception reçue : ', $e->getMessage(), "\n";
-        }
-    }
-
-
-    /**
-     * @Rest\Post(
-     *     "/initPayment"
-     * )
-     * @param Request $request
-     * @Rest\View
-     */
-    public function initPayment(Request $request)
-    {
-        try{
-            $em = $this->getDoctrine()->getManager();
-
-            //Init ordered with unique_id
-            $uniqueId = $request->get('ordered_unique_id');
-
-            if(!empty($uniqueId))
-            {
-                $ordered = $this->getDoctrine()
-                    ->getRepository(Ordered::class)
-                    ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
-
-                \Stripe\Stripe::setApiKey('sk_test_N902uxPZfI67qNRHX75vvdLc00L7Kv9Eo3');
-
-                $intent = \Stripe\PaymentIntent::create([
-                    'amount' => $ordered->getTotalPrice()*100,
-                    'currency' => 'eur',
-                    'payment_method_types' => ['card'],
-                ]);
-
-
-                $ordered->setStripeId($intent->client_secret)
-                    ->setState(3);
-                $em->persist($ordered);
-                $em->flush();
-
-                $data = [
-                    'id' => $intent->id,
-                    'clientSecret' => $intent->client_secret
-                ];
-
 
                 $view = $this->view($data, 201);
                 return $this->handleView($view);
             }
-        }
-        catch(\Exception $e) {
-            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : Payment - " . $e->getMessage());
+            throw $this->createNotFoundException(sprintf('No Ordered for the id ', $request->get('ordered_unique_id')));
+
+        } catch (\Exception $e) {
+            fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : validOrder - " . $e->getMessage() . "\n");
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
+
 
     /**
      * @Rest\Post(
@@ -265,15 +236,14 @@ class FrontController extends AbstractFOSRestController
      */
     public function payment(Request $request, \Swift_Mailer $mailer)
     {
-        try{
+        try {
             $em = $this->getDoctrine()->getManager();
 
             //Init ordered with unique_id
             $uniqueId = $request->get('ordered_unique_id');
             $paymentIntentId = $request->get('payment_intent_id');
 
-            if(!empty($uniqueId))
-            {
+            if (!empty($uniqueId)) {
                 $ordered = $this->getDoctrine()
                     ->getRepository(Ordered::class)
                     ->findOneBy(array("uniqueId" => $request->get("ordered_unique_id")));
@@ -282,8 +252,7 @@ class FrontController extends AbstractFOSRestController
 
                 $intent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
 
-                if($intent->status == "succeeded")
-                {
+                if ($intent->status == "succeeded") {
                     $message = (new \Swift_Message('Billeterie du Louvre'))
                         ->setFrom('mobyteck@gmail.com')
                         ->setTo($ordered->getEmail())
@@ -293,10 +262,13 @@ class FrontController extends AbstractFOSRestController
                                 ['ordered' => $ordered]
                             ),
                             'text/html'
-                        )
-                    ;
-                    $mailer->send($message,$failures);
+                        );
+                    $mailer->send($message, $failures);
                 }
+
+                $ordered->setState(3);
+                $em->persist($ordered);
+                $em->flush();
 
                 $data = [
                     "status" => $intent->status
@@ -306,48 +278,9 @@ class FrontController extends AbstractFOSRestController
                 $view = $this->view($data, 201);
                 return $this->handleView($view);
             }
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             fwrite(fopen('../src/errors/frontErrors.txt', "a+"), date('d-m-Y') . " : Payment - " . $e->getMessage());
             echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
-
-    /**
-     * @Post(
-     *  "/testMail"
-     * )
-     * @param Request $request
-     * @param \Swift_Mailer $mailer
-     * Rest\View
-     */
-    public function testMail(Request $request, \Swift_Mailer $mailer)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        //Init ordered with unique_id
-        $uniqueId = $request->get('ordered_unique_id');
-
-        $ordered = $this->getDoctrine()
-            ->getRepository(Ordered::class)
-            ->findOneBy(array("uniqueId" => $uniqueId));
-
-
-        $message = (new \Swift_Message('Billeterie du Louvre'))
-            ->setFrom('mobyteck@gmail.com')
-            ->setTo($ordered->getEmail())
-            ->setBody(
-                $this->renderView(
-                    'emails/receipt.html.twig',
-                    ['ordered' => $ordered]
-                ),
-                'text/html'
-            )
-        ;
-
-        $result = $mailer->send($message);
-
-        return $this->render('emails/receipt.html.twig', ['ordered' => $ordered]);
-    }
-
 }

@@ -10,9 +10,20 @@ open:
   Sunday: false
 
 holiday:
-  - 12/25
-  - 07/14
+#Jour de l'an
   - 01/01
+#Pâques
+  - 04/13
+#Fête du travail
+  - 05/01
+#Vitoire des alliés en 1945
+  - 05/08
+#Fête nationale
+  - 07/14
+#Noël
+  - 12/25
+
+
 #-------------------------------
 #date qui varie selon les années
 #-------------------------------
