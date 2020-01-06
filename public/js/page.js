@@ -29,11 +29,11 @@ class Page{
      *
      */
     initOrder_datepickerInit(){
+        this.observer.disconnect();
+
         const initDate = this.initData.holiday;
         const open = this.initData.open;
-        console.log(open);
         let holiday = [];
-
         initDate.forEach(element => {
             let date = new Date();
             let valueTemp = element.split('/');
@@ -43,11 +43,6 @@ class Page{
             holiday.push(element);
         });
 
-        this.observer.disconnect();
-        var date = new Date();
-        var year = date.getFullYear();
-        var month = date.getMonth();
-        var day = date.getDate();
         $('#visitDay').datepicker({
             format: 'yyyy/mm/dd',
             keyboardNavigation: false,

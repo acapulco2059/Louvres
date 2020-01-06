@@ -26,10 +26,10 @@ class TicketManager
      * @param $date
      * @throws \Exception
      */
-    public function availabilityCheck($numberOfTicket)
+    public function availabilityCheck($numberOfTicketSold, $numberOfTicketRequested)
     {
         $capacity = $this->date['capacity'];
-        $i = $capacity - $numberOfTicket;
+        $i = $capacity - ($numberOfTicketSold + $numberOfTicketRequested);
 
         if($i >= 0){
           return true;

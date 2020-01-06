@@ -73,7 +73,7 @@ class FrontController extends AbstractFOSRestController
             //check if the date selected and available
             if ($dateManager->isOpened(new \DateTime($request->get('visit_day')))) {
                 //check if the number of remaining tickets is sufficient
-                if ($ticketManager->availabilityCheck($getCountTicket))
+                if ($ticketManager->availabilityCheck($getCountTicket, $request->get('number_of_ticket')))
                 {
                     // Validate the email
                     if($inputValidator->isValidEmail($request->get('email')))
@@ -81,27 +81,32 @@ class FrontController extends AbstractFOSRestController
                         // Check if the var number of ticket is a number
                         if($inputValidator->isValidNumberOfTicket($request->get('number_of_ticket')))
                         {
-                            $ordered->setEmail($request->get('email'))
-                                ->setNumberOfTicket($request->get('number_of_ticket'))
-                                ->setVisitDay(new \DateTime($request->get('visit_day')))
-                                ->setTotalPrice($request->get('total_price'))
-                                ->setHalfDay($request->get('half_day'))
-                                ->setState(1);
+                            // halfDay Control
+                            if($dateManager->halfDay(new \DateTime($request->get('visit_day')), $request->get('half_day')))
+                            {
+                                $ordered->setEmail($request->get('email'))
+                                    ->setNumberOfTicket($request->get('number_of_ticket'))
+                                    ->setVisitDay(new \DateTime($request->get('visit_day')))
+                                    ->setTotalPrice($request->get('total_price'))
+                                    ->setHalfDay($request->get('half_day'))
+                                    ->setState(1);
 
-                            $em = $this->getDoctrine()->getManager();
+                                $em = $this->getDoctrine()->getManager();
 
-                            //set Order in BDD with doctrine
-                            $em->persist($ordered);
-                            $em->flush();
+                                //set Order in BDD with doctrine
+                                $em->persist($ordered);
+                                $em->flush();
 
-                            //prepares the information to be transmitted
-                            $data = [
-                                "number_of_ticket" => $ordered->getNumberOfTicket(),
-                                "ordered_unique_id" => $ordered->getUniqueId()
-                            ];
+                                //prepares the information to be transmitted
+                                $data = [
+                                    "number_of_ticket" => $ordered->getNumberOfTicket(),
+                                    "ordered_unique_id" => $ordered->getUniqueId()
+                                ];
 
-                            $view = $this->view($data, 201);
-                            return $this->handleView($view);
+                                $view = $this->view($data, 201);
+                                return $this->handleView($view);
+
+                            } return "Billet Journée non disponible à cet heure de la journée, veuillez selectionner un billet demi-journée";
 
                         } return "Ceci n'est pas un nombre";
 

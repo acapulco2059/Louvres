@@ -23,11 +23,13 @@ class DateManager
 
     /**
      * check if the museum is opened this day
-     * @param  DateTime $date [description]
-     * @return boolean        [description]
+     * @param \DateTime $date
+     * @return bool
+     * @throws \Exception
      */
     public function isOpened(\DateTime $date)
     {
+
         $day = date_format($date, 'l');
         $opened = $this->openDay[$day];
         $reservationDate = $date->format('Y/m/d');
@@ -35,5 +37,25 @@ class DateManager
             if (!in_array($reservationDate, $this->holiday)) return true;
         }
         return false;
+    }
+
+    /**
+     * @param \DateTime $date
+     * @param $halfDayStatus
+     * @throws \Exception
+     */
+    public function halfDay(\DateTime $date, $halfDayStatus)
+    {
+        $today = new \DateTime();
+        $hours = date_format($today, 'H');
+        $todaysDate = $today->format('Y/m/d');
+        $visitDate = $date->format('Y/m/d');
+        if($todaysDate === $visitDate && $hours > 12){
+            if($halfDayStatus){
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 }

@@ -1,13 +1,13 @@
 capacity: 1000
 
 open:
+  Sunday: false
   Monday: true
   Tuesday: false
   Wednesday: true
   Thursday: true
   Friday: true
   Saturday: true
-  Sunday: false
 
 holiday:
 #Jour de l'an
