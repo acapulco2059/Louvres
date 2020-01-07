@@ -175,6 +175,10 @@ class Page{
 
 
     template_initOrder(){
+        let headDom = document.querySelector('head');
+        let stripeScript = document.createElement('script');
+        stripeScript.src = 'js/validator/initOrderValidator.js';
+        headDom.appendChild(stripeScript);
 
         return `
         <h3 class="text-center">Billetterie en Ligne du Musée du Louvre</h3>
@@ -182,11 +186,18 @@ class Page{
             <div class='col-md-6'>
                 <div class="col-md-12">
                     <label for='email' >Email</label>
-                    <input class="form-control" type='text' name='email' id='email' placeholder='exemple@exemple.com'required/>
+                    <input class="form-control" type='text' name='email' id='email' placeholder='exemple@exemple.com' " required/>
+                    <div>
+                        <span id="emailError" class="formErrors"></span>
+                    </div>
                 </div>
                 <div class='col-md-12'>
                     <label for='numberOfTicket' >Quantité</label>
-                    <input class="form-control" type='text' name='numberOfTicket' id='numberOfTicket' value='1' required/>
+                    <input class="form-control" type='text' name='numberOfTicket' id='numberOfTicket' value='1' " required/>
+                    <div>
+                        <span id="numberOfTicketError" class="formErrors"></span>
+                    </div>
+
                 </div>
                 <div class='col-md-12'>
                     <label for='visitDay' >Date de la visite</label>
@@ -196,14 +207,19 @@ class Page{
                 </div>
                 <div class='col-md-12'>
                     <label class="form-check-label" for='halfday' >Demi-Journée (de 14h à 20h)</label>
-                    <input class="form-check-input" type='checkbox' id='halfday' />
+                    <input class="form-check-input" type='checkbox' id='halfday' o/>
                 </div>
-                 <button class='col-md-6' type="button" onclick="louvres.page.initOrder_finalize()">Validez</button>
+                 <button class='col-md-6' type="button" onclick="verifInitOrder()">Validez</button>
             </div>
          </section>`;
     }
 
     template_visitorsList(){
+        let headDom = document.querySelector('head');
+        let stripeScript = document.createElement('script');
+        stripeScript.src = 'js/validator/visitorsListValidator.js';
+        headDom.appendChild(stripeScript);
+
         var str = "";
         for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
             str += this.template_visitorsListPartial(i);
@@ -212,7 +228,7 @@ class Page{
         return `
             <section id='form2'>
                 ${str}
-                <button onclick="louvres.page.visitorsList_finalize()">Validez</button>
+                <button onclick="verifVisitorsList()">Validez</button>
             </section>`;
     }
 
@@ -224,10 +240,16 @@ class Page{
                 <div class='col-md-6'>
                     <label for='lastname'>Nom</label>
                     <input class="form-control" type='text' name='lastname${id}' id='lastname${id}' placeholder='Dupont' required />
+                    <div>
+                        <span id="lastnameError${id}" class="formErrors"></span>
+                    </div>
                 </div>
                 <div class='col-md-6'>
                     <label for='name' >Prénom</label>
                     <input class="form-control" type='text' name='firstname${id}' id='firstname${id}' placeholder='Jean' required />
+                    <div>
+                        <span id="firstnameError${id}" class="formErrors"></span>
+                    </div>
                 </div>
                 <div class='col-md-12'>
                     <label for='birthday' >Date de naissance</label>
