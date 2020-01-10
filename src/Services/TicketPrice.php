@@ -3,7 +3,8 @@
 
 namespace App\Services;
 
-use App\Entity\User;
+use
+    App\Entity\User;
 use Symfony\Component\Yaml\Yaml;
 
 class TicketPrice
