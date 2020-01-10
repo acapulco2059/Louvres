@@ -14,7 +14,7 @@
         "phpunit/phpunit": "^8.5",
         "ramsey/uuid": "^3.8",
         "ramsey/uuid-doctrine": "^1.5",
-        "sensio/framework-extra-bundle": "^5.1",
+        "sensio/framework-extra-bundle": "^5.5",
         "stripe/stripe-php": "^7.14",
         "symfony/asset": "4.3.*",
         "symfony/console": "4.3.*",
