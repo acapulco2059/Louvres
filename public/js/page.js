@@ -20,6 +20,7 @@ class Page{
     async initOrder_initialize(){
         var answer    = await fetch(`http://${this.url}`, {method: 'GET'});
         this.initData = await answer.json();
+        this.convertData();
         this.observer = new MutationObserver(()=>{this.initOrder_datepickerInit()});
         this.observer.observe(this.domContainer, { attributes: false, childList: true });
         this.render("initOrder");
@@ -47,6 +48,7 @@ class Page{
             format: 'yyyy/mm/dd',
             keyboardNavigation: false,
             datesDisabled: holiday,
+            daysOfWeekDisabled: this.closed,
             startDate: 'd',
             endDate: '+365d',
             language: "fr",
@@ -149,6 +151,15 @@ class Page{
         };
         await this.postAPI(stripeData, 'payment');
         this.paymentData = await this.content;
+        this.confirm_payment();
+    }
+
+    confirm_payment(){
+        if(this.paymentData.status = "succeeded")
+        {
+            this.render("confirmPayment");
+        }
+
     }
 
     /**
@@ -171,6 +182,19 @@ class Page{
         });
         this.content = await answer.json();
     }
+
+    convertData() {
+        this.closed = [];
+        if(!this.initData.open.Sunday) this.closed.push(0);
+        if(!this.initData.open.Monday) this.closed.push(1);
+        if(!this.initData.open.Tuesday) this.closed.push(2);
+        if(!this.initData.open.Wednesday) this.closed.push(3);
+        if(!this.initData.open.Thursday) this.closed.push(4);
+        if(!this.initData.open.Friday) this.closed.push(5);
+        if(!this.initData.open.Saturday) this.closed.push(6);
+        this.closed = this.closed.join(",");
+    }
+
 
 
 
@@ -209,7 +233,7 @@ class Page{
                     <label class="form-check-label" for='halfday' >Demi-Journée (de 14h à 20h)</label>
                     <input class="form-check-input" type='checkbox' id='halfday' o/>
                 </div>
-                 <button class='col-md-6' type="button" onclick="verifInitOrder()">Validez</button>
+                 <button class='col-md-4' type="button" onclick="verifInitOrder()">Validez</button>
             </div>
          </section>`;
     }
@@ -321,10 +345,31 @@ class Page{
         `;
     }
 
+    template_confirmPayment(){
+        return `
+        <div class="">
+            <h3>Paiement accepté</h3>
+            <div class="">
+                <span class="">Un email de confirmation vient de vous être envoyé sur votre boite : ${this.paymentData.email}</span>
+            </div>
+            <div class="">
+                <span class="">Nous vous souhaitons une agréable visite au musée du Louvre</span>
+            </div>
+            <div class="">
+                <button onclick="this.initOrder_initialize()">Retour à l'accueil</button>
+            </div>    
+        </div>
+        `;
+    }
+
 
     template_loading(){
         return `
-		je suis en train de charger
+        <div class="d-flex justify-content-center">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
 		`;
 
     }

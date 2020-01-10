@@ -46,7 +46,6 @@ submitButton.addEventListener('click', function(ev) {
         } else {
             // The payment has been processed!
             if (result.paymentIntent.status === 'succeeded') {
-               alert('Paiement réussi')
                 window.louvres.page.stripeStep_payment();
             }
         }
