@@ -8,7 +8,6 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
-use Symfony\Bundle\WebProfilerBundle;
 
 class Kernel extends BaseKernel
 {
