@@ -98,6 +98,7 @@ class Page{
         for (let i = 1; i <= this.orderData.number_of_ticket; i++) {
             $('#birthday'+i).datepicker({
                 format: 'yyyy/mm/dd',
+                startView: 3,
                 endDate: 'd',
                 language: "fr",
             });
@@ -304,7 +305,7 @@ class Page{
         <section>
         ${summary}
         <div class="">
-            <span class="">Total de la commande :</span> ${this.visitorData.total_price}
+            <span class="">Total de la commande :</span> ${this.visitorData.total_price} €
         </div>
         </section>
         
