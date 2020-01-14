@@ -39,13 +39,13 @@
         "symfony/validator": "4.3.*",
         "symfony/web-link": "4.3.*",
         "symfony/web-profiler-bundle": "4.3.*",
+        "symfony/web-server-bundle": "4.3.*",
         "symfony/yaml": "4.3.*"
     },
     "require-dev": {
         "symfony/debug-pack": "*",
         "symfony/profiler-pack": "*",
-        "symfony/test-pack": "^1.0",
-        "symfony/web-server-bundle": "4.3.*"
+        "symfony/test-pack": "^1.0"
     },
     "config": {
         "preferred-install": {

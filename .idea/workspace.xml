@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9a8376b3-3029-433e-af0e-97322daaff78" name="Default Changelist" comment="" />
+    <list default="true" id="9a8376b3-3029-433e-af0e-97322daaff78" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,8 +72,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/composer.lock">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5385">
-              <caret line="8235" column="10" selection-start-line="8235" selection-start-column="10" selection-end-line="8235" selection-end-column="10" />
+            <state relative-caret-position="-3480">
+              <caret line="8362" column="10" selection-start-line="8362" selection-start-column="10" selection-end-line="8362" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -507,7 +511,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="201579000" />
+    <option name="totallyTimeSpent" value="201816000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
@@ -578,6 +582,20 @@
                 </list>
               </option>
             </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
           </value>
         </entry>
       </map>
@@ -888,8 +906,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/composer.lock">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5385">
-          <caret line="8235" column="10" selection-start-line="8235" selection-start-column="10" selection-end-line="8235" selection-end-column="10" />
+        <state relative-caret-position="-3480">
+          <caret line="8362" column="10" selection-start-line="8362" selection-start-column="10" selection-end-line="8362" selection-end-column="10" />
         </state>
       </provider>
     </entry>
