@@ -7,6 +7,7 @@ class Page{
         this.orderData;
         this.visitorData;
         this.paymentData;
+        this.country;
         window.louvres.page = this;
         this.render("loading");
 
@@ -84,6 +85,10 @@ class Page{
     async visitorsList_initialize(orderData){
         await this.postAPI(orderData,'initOrder');
         this.orderData = await this.content;
+        if(typeof(this.content) === "string") {
+            alert(this.content);
+            this.initOrder_initialize();
+        }
         this.observer  = new MutationObserver(()=>{this.visitorsList_datepickerInit()});
         this.observer.observe(this.domContainer, { attributes: false, childList: true });
         this.render("visitorsList");
@@ -115,12 +120,13 @@ class Page{
         let visitor = [];
         for(let j=1 ; j <= numberOfTicket; j++) {
             let reduice = document.getElementById(`reduice${j}`);
+            console.log(document.getElementById(`country${j}`).value);
 
             var visitorDatas = {
                 lastname: document.getElementById(`lastname${j}`).value,
                 firstname: document.getElementById(`firstname${j}`).value,
                 birthday: document.getElementById(`birthday${j}`).value,
-                country: 75,
+                country: document.getElementById(`country${j}`).value,
                 reduice: reduice.checked
             };
             visitor.push(visitorDatas);
@@ -257,7 +263,18 @@ class Page{
             </section>`;
     }
 
+    template_visitorsListCountry(country, i){
+        return `
+        <option value="${country[i].code}">${country[i].name_fr_fr}</option>
+        `
+    }
+
     template_visitorsListPartial(id){
+        let country = this.orderData.country
+        let countrys = "";
+        for (let i = 0; i < country.length; i++){
+            countrys += this.template_visitorsListCountry(country, i);
+        }
 
         return `
             <h4>Visiteur ${id}</h4>
@@ -282,11 +299,18 @@ class Page{
                       <input type="text" id='birthday${id}' class="form-control" required><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
                     </div>
                 </div>
-                <div class='row col-md-12'>
-                    <label class="form-check-label" for='reduice' >Tarif réduit (Avec justificatif)</label>
-                    <input clas="form-check-input" type='checkbox' id='reduice${id}'/>
+                <div class="form-group col-md-6">
+                   <label for="country">Pays</label>
+                   <select id="country${id}" class="form-control">
+                        ${countrys}
+                   </select>
                 </div>
-            </div>`;
+                <div class='row col-md-6'>
+                    <label class="form-check-label" for='reduice' >Tarif réduit (Avec justificatif)</label></br>
+                    <input class="form-check-input" type='checkbox' id='reduice${id}'/>
+                </div>
+            </div>
+            <hr align="center" width="80%"/>`;
     }
 
     template_stripeStep(){
@@ -301,14 +325,14 @@ class Page{
         }
 
         return `
-        <h3 class="orderTitle">Résumé de votre comamnde</h3>
+        <h3 class="orderTitle">Résumé de votre commande</h3>
         <section>
         ${summary}
         <div class="">
             <span class="">Total de la commande :</span> ${this.visitorData.total_price} €
         </div>
         </section>
-        
+        <hr align="center" width="80%"/>
         <div id="card_form">
             <div id="card-element">
               <!-- Elements will create input elements here -->
@@ -316,7 +340,7 @@ class Page{
             
             <!-- We'll put the error messages in this element -->
             <div id="card-errors" role="alert"></div>
-                        
+            <hr align="center" width="80%"/>
             <button id="submit">Payez ${this.visitorData.total_price} €</button>        
         </div>
 
@@ -328,7 +352,7 @@ class Page{
         return `
         <div class="">
             <div class="">
-            Visiteur n°${i + 1}
+              <h4>Visiteur n°${i + 1}</h4>
             </div>
             <div class="">
                 <span class="">Nom :</span> ${this.visitorData.users[i].lastname}
@@ -343,6 +367,7 @@ class Page{
                 <span class="">Numéro de billet :</span> ${this.visitorData.users[i].unique_id}
             </div>
         </div>
+        <hr align="center" width="80%"/>
         `;
     }
 
@@ -354,11 +379,11 @@ class Page{
                 <span class="">Un email de confirmation vient de vous être envoyé sur votre boite : ${this.paymentData.email}</span>
             </div>
             <div class="">
-                <span class="">Nous vous souhaitons une agréable visite au musée du Louvre</span>
+                <span class="">Votre numéro de commande est le : ${this.paymentData.ordered_unique_id}</span>
             </div>
             <div class="">
-                <button onclick="this.initOrder_initialize()">Retour à l'accueil</button>
-            </div>    
+                <span class="">Nous vous souhaitons une agréable visite au musée du Louvre</span>
+            </div>
         </div>
         `;
     }
@@ -374,7 +399,4 @@ class Page{
 		`;
 
     }
-
-
-
 };

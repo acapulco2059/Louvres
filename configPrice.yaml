@@ -4,6 +4,7 @@ price:
     normal: 16
     senior: 12
     reduced: 10
+    halfday: 0.5
 
 age: #item -> jusqu'à (ex: baby: 4 -> de 0 jusqu'à 4ans)
     baby: 4

@@ -50,6 +50,7 @@ class DateManager
         $hours = date_format($today, 'H');
         $todaysDate = $today->format('Y/m/d');
         $visitDate = $date->format('Y/m/d');
+ //       if($todaysDate === $visitDate && !$hours < 15) return false;
         if($todaysDate === $visitDate && $hours > 12){
             if($halfDayStatus){
                 return true;

@@ -20,6 +20,7 @@ class TicketPrice
         $this->price["normal"] = $value["price"]["normal"];
         $this->price["senior"] = $value["price"]["senior"];
         $this->price["reduced"] = $value["price"]["reduced"];
+        $this->price["halfday"] = $value["price"]["halfday"];
 
         $this->age["baby"] = $value["age"]["baby"];
         $this->age["children"] = $value["age"]["children"];

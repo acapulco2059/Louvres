@@ -28,11 +28,21 @@ use Symfony\Component\Yaml\Yaml;
 
 class FrontController extends AbstractFOSRestController
 {
+//    /**
+//     * @Route("/", name="home")
+//     */
+//    public function index()
+//    {
+//        return $this->render('index.html.twig', [
+//            'title' => "Musée du Louvre - Accueil",
+//        ]);
+//    }
+
     /**
      * @Rest\Get(
      *     "/"
      * )
-     * @View
+     * @Rest\View
      */
     public function home()
     {
@@ -42,8 +52,8 @@ class FrontController extends AbstractFOSRestController
         $value = $priceValue + $dateValue;
 
         $view = $this->view($value, 200)
-            ->setTemplate('public/index.html');
-        return $view;
+            ->setTemplate('index.html');
+        return $this->handleView($view);
     }
 
     /**
@@ -70,6 +80,12 @@ class FrontController extends AbstractFOSRestController
                 ->countNumberOfTicket(new \DateTime($request->get('visit_day')));
             $getCountTicket = intval($getCountTicket['totalTicket']);
 
+            //Get All Country for the view
+            $allCountry = $this->getDoctrine()
+                ->getManager()
+                ->getRepository(Country::class);
+            $allCountry = $allCountry->findAll();
+
             //check if the date selected and available
             if( !$dateManager->isOpened(new \DateTime($request->get('visit_day')))) return "Date non disponible";
             //check if the number of remaining tickets is sufficient
@@ -94,18 +110,23 @@ class FrontController extends AbstractFOSRestController
             $em->persist($ordered);
             $em->flush();
 
+            // Creating the Countrys array for the View
+            $countrys = array();
+            foreach($allCountry as $value) {
+                $insertCountry = array('code' => $value->getCode(),
+                    'name_fr_fr' => $value->getNameFrFr());
+                array_push($countrys, $insertCountry);
+            }
+
             //prepares the information to be transmitted
             $data = [
                 "number_of_ticket" => $ordered->getNumberOfTicket(),
-                "ordered_unique_id" => $ordered->getUniqueId()
+                "ordered_unique_id" => $ordered->getUniqueId(),
+                "country" => $countrys
             ];
 
             $view = $this->view($data, 201);
             return $this->handleView($view);
-
-
-
-
 
         } catch (\Exception $e) {
             fwrite(fopen('../src/errors/frontErrors.txt', 'a+'), date('d-m-Y') . " : initOrder - " . $e->getMessage()) . "\n";
@@ -141,7 +162,7 @@ class FrontController extends AbstractFOSRestController
                 $ticketPrice = new TicketPrice();
 
                 $birthday = new \DateTime($visitor[$i]['birthday']);
-                $userPrice = $ticketPrice->userPrice($visitor[$i]['birthday'], $visitor[$i]['reduice']);
+                $userPrice = $ticketPrice->userPrice($visitor[$i]['birthday'], $visitor[$i]['reduice'], $ordered->getHalfDay());
 
                 $user->setFirstname($visitor[$i]['firstname'])
                     ->setLastname($visitor[$i]['lastname'])

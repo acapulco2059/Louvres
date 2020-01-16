@@ -24,6 +24,7 @@ class OrderedRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('u')
             ->select('SUM(u.numberOfTicket) as totalTicket')
             ->where('u.visitDay = :visitDay')
+            ->andWhere('u.state = 3')
             ->setParameter('visitDay', $date)
             ->getQuery()
             ->getOneOrNullResult();

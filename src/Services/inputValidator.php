@@ -19,6 +19,10 @@ class inputValidator
         } return false;
     }
 
+    /**
+     * @param $numberOfTicket
+     * @return bool
+     */
     function isValidNumberOfTicket($numberOfTicket){
         if(preg_match("/^[0-9]{1,2}$/", $numberOfTicket)){
             return true;
