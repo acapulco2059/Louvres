@@ -73,17 +73,11 @@ class TicketPrice
 
     private function priceCalc($halfday, $reduice, $reduicePrice, $userPrice)
     {
-        if($halfday && $userPrice ==! 0){
+        if($halfday && $userPrice){
             if($reduice) {
                 $price = $reduicePrice * $this->price["halfday"];
             } else {
                 $price = $userPrice * $this->price["halfday"];
-            }
-        } elseif ($halfday && $userPrice === 0) {
-            if($reduice) {
-                $price = 0;
-            } else {
-                $price = 0;
             }
         } else {
             if($reduice) {

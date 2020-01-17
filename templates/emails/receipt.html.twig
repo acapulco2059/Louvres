@@ -2,36 +2,48 @@
 
 {% block body %}
     <p><img src="https://www.novastan.org/fr/wp-content/uploads/sites/4/2018/03/Image1-1.jpg" alt="logo du louvre" /></p>
-    <h1>Résumé de votre commande</h1>
+    <h1 style="text-align: center; color: #000000">Résumé de votre commande</h1>
 
 
+    <div style="color: #000000">
         <div>
-            {{ ordered.numberOfTicket }} Billet(s) {% if  ordered.halfDay   %} demi-journée {% else %} journée {% endif %} <br/>
-            Date de visite : {{ ordered.visitDay|date('d-m-Y') }} <br/>
-            Montant total de la commande : {{ ordered.totalPrice }} €<br/>
-            Numéro de commande : {{ ordered.uniqueId }} <br/>
-            {% for ticket in ordered.tickets %}
+            <h3 style="text-align: center; color: #000000;">{{ ordered.numberOfTicket }} Billet(s) {% if  ordered.halfDay   %} demi-journée {% else %} journée {% endif %}</h3>
         </div>
-
-        <hr/>
+        <br/>
         <div>
-            <div class="jumbotron jumbotron-fluid">
-                <div class="container">
-                    <h3 class="display-4">{{ ticket.user.lastname }} {{ ticket.user.firstname }}</h3>
-                    <p class="lead">N°: {{ ticket.uniqueId }}<br/></p>
-                    <p>
-                        Date de naissance : {{ ticket.user.birthDate|date('d-m-Y') }}<br/>
-                        Prix : {{ ticket.price }} €
-                    </p>
-                </div>
+            <strong>Date de visite :</strong> {{ ordered.visitDay|date('d-m-Y') }}
+        </div>
+        <br/>
+        <div>
+            <strong>Montant total de la commande :</strong> {{ ordered.totalPrice }} €
+        </div>
+        <br/>
+        <div>
+            <strong>Numéro de commande :</strong> {{ ordered.uniqueId }}
+        </div>
+        <br/>
+    </div>
+
+    {% for ticket in ordered.tickets %}
+        <hr/>
+        <div style="color: #000000">
+            <div style="background-color: #e3e3e3; border-color: #000000; border-width: 2px; border-radius: 5px; padding: 15px; margin: 15px">
+                <h3>{{ ticket.user.lastname }} {{ ticket.user.firstname }}</h3>
+                <p>N°: {{ ticket.uniqueId }}<br/></p>
+                <p>
+                    <strong>Date de naissance :</strong> {{ ticket.user.birthDate|date('d-m-Y') }}<br/>
+                    <strong>Prix :</strong> {{ ticket.price }} €
+                </p>
             </div>
         </div>
-                <hr/>
 
-                <div>
-                    <strong>Attention :</strong> N'oubliez pas de vous munir de justificatif(s) si vous disposez de billet(s) à tarif réduit <br/>
-                    <span>Nous vous souhaitons une agréable visite au musée du Louvre</span>
-                </div>
 
     {% endfor %}
+    <hr/>
+    <div style="text-align: center; color: #000000">
+        <strong> Attention :</strong> N'oubliez pas de vous munir de justificatif(s) si vous disposez de billet(s) à tarif réduit <br/>
+        <span>Nous vous souhaitons une agréable visite au musée du Louvre</span>
+    </div>
+
+
 {% endblock %}

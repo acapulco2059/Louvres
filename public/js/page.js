@@ -311,6 +311,7 @@ class Page{
                 <div class='row col-md-6'>
                     <label class="form-check-label" for='reduice' >Tarif réduit (Avec justificatif)</label></br>
                     <input class="form-check-input" type='checkbox' id='reduice${id}'/>
+                    <span style="font-style: italic; font-size: 10px">Tarif pour les étudiants, employés de musée, du Ministère de la Culture et les militaires</span>
                 </div>
             </div>
             <hr align="center" width="80%"/>`;
@@ -382,7 +383,7 @@ class Page{
                 <span class="">Un email de confirmation vient de vous être envoyé sur votre boite : ${this.paymentData.email}</span>
             </div>
             <div class="">
-                <span class="">Votre numéro de commande est le : ${this.paymentData.ordered_unique_id}</span>
+                <span class="">Votre numéro de commande est le : ${this.visitorData.ordered_unique_id}</span>
             </div>
             <div class="">
                 <span class="">Nous vous souhaitons une agréable visite au musée du Louvre</span>
@@ -394,12 +395,7 @@ class Page{
 
     template_loading(){
         return `
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-        </div>
-		`;
-
+        <div class="loader">Loading...</div>
+        `;
     }
 };
