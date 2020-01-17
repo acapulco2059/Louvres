@@ -59,3 +59,17 @@ https://github.com/doctrine/DoctrineBundle/issues/673
 (Network error [errno 6]: Could not resolve host: api.stripe.com)30-12-2019 : Payment - Could not determine which URL to request: Stripe\PaymentIntent instance has invalid ID: 30-12-2019 : Payment - No such payment_intent: pi_1FvGGNEjT0CFsAFzk40f6mda_secret_BSBrOheugZbQl5DIIMlKwHoPc31-12-2019 : Payment - Could not determine which URL to request: Stripe\PaymentIntent instance has invalid ID: 31-12-2019 : initOrder - DateTime::__construct(): Failed to parse time string (2) at position 0 (2): Unexpected character02-01-2020 : initOrder - File "./configDate.yaml" does not exist.02-01-2020 : initOrder - File "/Users/acapulco/Documents/Progz/OpenClassRooms/Projets/projet_4/louvre/src/Services/../configDate.yaml" does not exist.04-01-2020 : initOrder - DateTime::__construct(): Failed to parse time string (26/01/2020) at position 0 (2): Unexpected character04-01-2020 : initOrder - DateTime::__construct(): Failed to parse time string (15/01/2020) at position 0 (1): Unexpected character08-01-2020 : initOrder - An exception occurred in driver: SQLSTATE[HY000] [2002] Connection refused08-01-2020 : initOrder - An exception occurred in driver: SQLSTATE[HY000] [2002] Connection refused09-01-2020 : initOrder - An exception occurred in driver: SQLSTATE[HY000] [2002] Connection refused09-01-2020 : initOrder - An exception occurred in driver: SQLSTATE[HY000] [2002] Connection refused15-01-2020 : validOrder - Notice: Undefined index: halfday
 16-01-2020 : validOrder - Notice: Undefined variable: price
 16-01-2020 : validOrder - Notice: Undefined variable: price
+16-01-2020 : validOrder - Invalid positive integer
+16-01-2020 : validOrder - Invalid positive integer
+16-01-2020 : validOrder - Notice: Undefined variable: price
+16-01-2020 : validOrder - Notice: Undefined variable: price
+16-01-2020 : validOrder - An exception occurred while executing 'INSERT INTO ticket (unique_id, price, ordered_id, user_id) VALUES (?, ?, ?, ?)' with params ["e28b5b5a-9a4e-46d1-a253-531ecded5442", "", 149, 84]:
+
+SQLSTATE[HY000]: General error: 1366 Incorrect decimal value: '' for column 'price' at row 1
+16-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer
+17-01-2020 : validOrder - Invalid positive integer

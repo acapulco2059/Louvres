@@ -120,7 +120,6 @@ class Page{
         let visitor = [];
         for(let j=1 ; j <= numberOfTicket; j++) {
             let reduice = document.getElementById(`reduice${j}`);
-            console.log(document.getElementById(`country${j}`).value);
 
             var visitorDatas = {
                 lastname: document.getElementById(`lastname${j}`).value,
@@ -151,6 +150,10 @@ class Page{
         this.render("stripeStep");
     }
 
+    /**
+     *
+     * @returns {Promise<void>}
+     */
     async stripeStep_payment(){
         var stripeData = {
             ordered_unique_id: this.orderData.ordered_unique_id,
@@ -328,7 +331,7 @@ class Page{
         <h3 class="orderTitle">Résumé de votre commande</h3>
         <section>
         ${summary}
-        <div class="">
+        <div>
             <span class="">Total de la commande :</span> ${this.visitorData.total_price} €
         </div>
         </section>
